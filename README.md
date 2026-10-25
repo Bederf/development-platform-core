@@ -61,6 +61,23 @@ pytest -q
 The schemas and fixtures are self-contained and do not require external
 services or secrets.
 
+## Project status
+
+**Maturity: public source-first foundation / active reference implementation.**
+Contracts, schemas, fixtures and conformance surfaces are the most complete
+parts of this release. Adapters are intentionally replaceable examples; this
+repository is not a hosted platform or a turnkey autonomous-agent runtime.
+
+## Fastest tour
+
+```bash
+python -m pip install -e '.[dev]'
+pytest -q
+```
+
+Start with the [contract index](contracts/README.md), then follow the
+[GSD integration boundary](docs/integrations/gsd-master.md).
+
 ## License
 
 Copyright (c) Pieter van Rooyen. Released under the MIT License; see
