@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OCR_BIN="${OCR_BIN:-${SCRIPT_DIR}/../tools/open-code-review/node_modules/.bin/ocr}"
+
+# Direct provider configuration is the default; OmniRoute is optional.
+OCR_USE_OMNIROUTE="${OCR_USE_OMNIROUTE:-0}"
+if [[ "$OCR_USE_OMNIROUTE" == "1" ]]; then
+  export OMNIROUTE_CODE_REVIEW_MODEL="${OMNIROUTE_CODE_REVIEW_MODEL:-deepseek/deepseek-v4-flash}"
+  : "${OMNIROUTE_CODE_REVIEW_MODEL:?OMNIROUTE_CODE_REVIEW_MODEL must be set to a pinned model when OCR_USE_OMNIROUTE=1}"
+  case "${OMNIROUTE_CODE_REVIEW_MODEL,,}" in
+    auto|auto/*)
+      echo "OpenCode Review requires a pinned OmniRoute model; auto routing is not allowed" >&2
+      exit 2
+      ;;
+  esac
+
+  OCR_TEMP_HOME="$(mktemp -d)"
+  trap 'rm -rf "$OCR_TEMP_HOME"' EXIT
+  export HOME="$OCR_TEMP_HOME"
+  "$OCR_BIN" config set provider omniroute >/dev/null
+  : "${OMNIROUTE_BASE_URL:?OMNIROUTE_BASE_URL must be injected by the Infisical-backed OmniRoute route}"
+  "$OCR_BIN" config set custom_providers.omniroute.url "$OMNIROUTE_BASE_URL" >/dev/null
+  "$OCR_BIN" config set custom_providers.omniroute.protocol openai >/dev/null
+  "$OCR_BIN" config set custom_providers.omniroute.model "$OMNIROUTE_CODE_REVIEW_MODEL" >/dev/null
+  # No-auth OmniRoute providers do not need an upstream credential. If the
+  # local gateway requires authentication, use its scoped gateway key here;
+  # this temporary config is removed when OCR exits.
+  "$OCR_BIN" config set custom_providers.omniroute.api_key "${OMNIROUTE_API_KEY:-local-no-auth}" >/dev/null
+fi
+
+run_review_and_require_completion() {
+  local output_file status
+  output_file="$(mktemp)"
+  if ! timeout --kill-after=5 300 "$@" >"$output_file"; then
+    cat "$output_file"
+    rm -f "$output_file"
+    return 1
+  fi
+  cat "$output_file"
+  if ! status="$(python3 - "$output_file" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as stream:
+    payload = json.load(stream)
+summary = payload.get("summary") if isinstance(payload, dict) else None
+coverage = summary.get("files_reviewed") if isinstance(summary, dict) else None
+if type(coverage) is not int or coverage <= 0:
+    raise SystemExit("Open Code Review returned no verified file coverage")
+print(payload.get("status", "missing"))
+PY
+)"; then
+    rm -f "$output_file"
+    return 1
+  fi
+  rm -f "$output_file"
+  if [[ "$status" != "complete" && "$status" != "completed" && "$status" != "success" ]]; then
+    echo "Open Code Review did not complete cleanly: status=$status" >&2
+    return 1
+  fi
+}
+
+if (($# > 0)); then
+  REVIEW_FILES=()
+  for path in "$@"; do
+    case "$path" in
+      *.c|*.cc|*.cpp|*.go|*.h|*.hpp|*.java|*.js|*.jsx|*.mjs|*.py|*.rs|*.sh|*.ts|*.tsx|*.vue|*.yaml|*.yml|*.json|*.toml|*.xml)
+        REVIEW_FILES+=("$path")
+        ;;
+    esac
+  done
+  if ((${#REVIEW_FILES[@]} == 0)); then
+    exit 0
+  fi
+  for path in "${REVIEW_FILES[@]}"; do
+    if [[ "$path" == *,* || "$path" == *$'\n'* ]]; then
+      echo "OCR cannot represent this file path safely" >&2
+      exit 2
+    fi
+  done
+  IFS=,
+  REVIEW_PATHS="${REVIEW_FILES[*]}"
+  OCR_TIMEOUT_MINUTES="${OCR_TIMEOUT_MINUTES:-3}"
+  run_review_and_require_completion "$OCR_BIN" scan --path "$REVIEW_PATHS" --no-plan --no-summary --concurrency 1 --timeout "$OCR_TIMEOUT_MINUTES" --audience=agent --format json
+else
+  echo "Provide immutable snapshot file paths; implicit working-tree review is disabled" >&2
+  exit 2
+fi

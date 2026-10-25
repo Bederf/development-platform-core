@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "policy-decision.v1",
+  "title": "Policy Decision Contract Family v1 Candidate",
+  "oneOf": [{"$ref": "#/$defs/request"}, {"$ref": "#/$defs/decision"}],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "time": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"},
+    "ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["semantic_type", "id", "version"],
+      "properties": {
+        "semantic_type": {"$ref": "#/$defs/id"}, "id": {"$ref": "#/$defs/id"},
+        "version": {"type": "string", "minLength": 1}, "digest": {"$ref": "#/$defs/digest"},
+        "issuer": {"type": "string", "minLength": 1}
+      }
+    },
+    "immutable_ref": {"allOf": [{"$ref": "#/$defs/ref"}, {"required": ["digest"]}]},
+    "request_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "policy_request"}}}]},
+    "evaluation_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evaluation_result"}}}]},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["scope_type", "scope_id", "profile"],
+      "properties": {"scope_type": {"$ref": "#/$defs/id"}, "scope_id": {"type": "string", "minLength": 1}, "profile": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}}
+    },
+    "availability": {
+      "type": "object", "additionalProperties": false, "required": ["status", "reason"],
+      "properties": {"status": {"enum": ["assessed", "not_assessed", "unavailable", "not_applicable"]}, "reason": {"type": ["string", "null"], "minLength": 1}},
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "assessed"}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "null"}}}},
+        {"if": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "condition": {
+      "type": "object", "additionalProperties": false, "required": ["condition_id", "requirement", "must_be_enforced_by"],
+      "properties": {"condition_id": {"$ref": "#/$defs/id"}, "requirement": {"$ref": "#/$defs/ref"}, "must_be_enforced_by": {"$ref": "#/$defs/ref"}}
+    },
+    "use_policy": {
+      "type": "object", "additionalProperties": false, "required": ["mode", "max_uses"],
+      "properties": {"mode": {"enum": ["single_use", "bounded_reuse"]}, "max_uses": {"type": "integer", "minimum": 1}},
+      "allOf": [{"if": {"properties": {"mode": {"const": "single_use"}}, "required": ["mode"]}, "then": {"properties": {"max_uses": {"const": 1}}}}]
+    },
+    "request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "request_id", "domain", "action", "subject", "actor", "requested_by", "policies", "fact_inputs", "evaluation_inputs", "requested_scope", "requested_at", "lineage", "digest"],
+      "properties": {
+        "schema": {"const": "policy-decision.v1"}, "entity_type": {"const": "policy_request"}, "request_id": {"$ref": "#/$defs/id"},
+        "domain": {"enum": ["admission", "execution", "disclosure", "transition", "acceptance"]}, "action": {"$ref": "#/$defs/id"},
+        "subject": {"$ref": "#/$defs/immutable_ref"}, "actor": {"$ref": "#/$defs/ref"}, "requested_by": {"$ref": "#/$defs/ref"},
+        "policies": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}}, "fact_inputs": {"type": "array", "items": {"$ref": "#/$defs/ref"}},
+        "evaluation_inputs": {"type": "array", "items": {"$ref": "#/$defs/evaluation_ref"}}, "requested_scope": {"$ref": "#/$defs/scope"},
+        "requested_at": {"$ref": "#/$defs/time"}, "lineage": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "decision_id", "request", "domain", "action", "subject", "actor", "outcome", "policies", "issuer", "authority_binding", "direct_supports", "reason_codes", "conditions", "use_policy", "validity_scope", "issued_at", "effective_from", "valid_until", "revoked_at", "lineage", "limitations", "limitations_availability", "supersession", "digest"],
+      "properties": {
+        "schema": {"const": "policy-decision.v1"}, "entity_type": {"const": "policy_decision"}, "decision_id": {"$ref": "#/$defs/id"},
+        "request": {"$ref": "#/$defs/request_ref"}, "domain": {"enum": ["admission", "execution", "disclosure", "transition", "acceptance"]},
+        "action": {"$ref": "#/$defs/id"}, "subject": {"$ref": "#/$defs/immutable_ref"}, "actor": {"$ref": "#/$defs/ref"},
+        "outcome": {"enum": ["allow", "deny", "review_required", "conditional", "unknown"]},
+        "policies": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}}, "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/ref"}, "direct_supports": {"type": "array", "items": {"$ref": "#/$defs/ref"}},
+        "reason_codes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}}, "conditions": {"type": "array", "items": {"$ref": "#/$defs/condition"}},
+        "use_policy": {"oneOf": [{"$ref": "#/$defs/use_policy"}, {"type": "null"}]}, "validity_scope": {"$ref": "#/$defs/scope"},
+        "issued_at": {"$ref": "#/$defs/time"}, "effective_from": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]},
+        "valid_until": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]}, "revoked_at": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]},
+        "lineage": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}}, "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "limitations_availability": {"$ref": "#/$defs/availability"}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]},
+        "digest": {"$ref": "#/$defs/digest"}
+      },
+      "allOf": [
+        {"if": {"properties": {"outcome": {"const": "allow"}}, "required": ["outcome"]}, "then": {"properties": {"direct_supports": {"minItems": 1}, "effective_from": {"$ref": "#/$defs/time"}, "valid_until": {"$ref": "#/$defs/time"}, "conditions": {"maxItems": 0}, "use_policy": {"$ref": "#/$defs/use_policy"}}}},
+        {"if": {"properties": {"outcome": {"const": "conditional"}}, "required": ["outcome"]}, "then": {"properties": {"conditions": {"minItems": 1}, "use_policy": {"type": "null"}}}},
+        {"if": {"properties": {"outcome": {"enum": ["deny", "review_required", "unknown"]}}, "required": ["outcome"]}, "then": {"properties": {"conditions": {"maxItems": 0}, "use_policy": {"type": "null"}}}},
+        {"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}}
+      ]
+    }
+  }
+}

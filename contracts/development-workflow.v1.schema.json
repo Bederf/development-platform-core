@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "development-workflow.v1",
+  "title": "DevelopmentWorkflow v1",
+  "description": "Provider-neutral lifecycle record for governed, traceable development work.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "workflow_id",
+    "intent_ref",
+    "status",
+    "current_stage",
+    "artifacts",
+    "gates",
+    "transitions",
+    "evidence_refs",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema": {"const": "development-workflow.v1"},
+    "workflow_id": {"type": "string", "minLength": 1},
+    "intent_ref": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACTIVE", "BLOCKED", "REJECTED", "ACCEPTED", "CANCELLED"]},
+    "current_stage": {
+      "enum": [
+        "INTENT",
+        "SPECIFICATION",
+        "ASSESSMENT",
+        "PLAN",
+        "TASKS",
+        "IMPLEMENTATION",
+        "VERIFICATION",
+        "CONVERGENCE",
+        "REMEDIATION",
+        "ACCEPTANCE"
+      ]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/artifact"},
+      "uniqueItems": true
+    },
+    "gates": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/gate"},
+      "uniqueItems": true
+    },
+    "transitions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/transition"}
+    },
+    "verification_refs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "acceptance_ref": {"type": ["string", "null"], "minLength": 1},
+    "authorization_ref": {"type": ["string", "null"], "minLength": 1},
+    "authorization_digest": {"type": ["string", "null"], "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+    "acceptance_content": {"anyOf": [{"$ref": "acceptance-content.v1.schema.json"}, {"type": "null"}]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "ACCEPTED"}}},
+      "then": {
+        "required": ["verification_refs", "acceptance_ref", "authorization_ref", "authorization_digest", "acceptance_content"],
+        "properties": {
+          "current_stage": {"const": "ACCEPTANCE"},
+          "verification_refs": {"minItems": 1},
+          "acceptance_ref": {"type": "string", "minLength": 1},
+          "artifacts": {
+            "contains": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {"kind": {"const": "acceptance"}}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_ref", "kind", "stage", "artifact_version", "digest", "producer", "created_at"],
+      "properties": {
+        "artifact_ref": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["intent", "specification", "assessment", "plan", "task_list", "implementation", "verification", "convergence", "remediation", "acceptance"]},
+        "stage": {"enum": ["INTENT", "SPECIFICATION", "ASSESSMENT", "PLAN", "TASKS", "IMPLEMENTATION", "VERIFICATION", "CONVERGENCE", "REMEDIATION", "ACCEPTANCE"]},
+        "artifact_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "digest": {"type": "string", "minLength": 1},
+        "producer": {"type": "string", "minLength": 1},
+        "supersedes_ref": {"type": ["string", "null"], "minLength": 1},
+        "created_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate_id", "stage", "decision", "decided_by", "evidence_refs", "decided_at"],
+      "properties": {
+        "gate_id": {"type": "string", "minLength": 1},
+        "stage": {"enum": ["SPECIFICATION", "ASSESSMENT", "PLAN", "TASKS", "IMPLEMENTATION", "VERIFICATION", "CONVERGENCE", "REMEDIATION", "ACCEPTANCE"]},
+        "decision": {"enum": ["PENDING", "APPROVED", "REJECTED", "RETURNED"]},
+        "decided_by": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "decided_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transition_id", "from_stage", "to_stage", "actor", "decision", "evidence_refs", "occurred_at"],
+      "properties": {
+        "transition_id": {"type": "string", "minLength": 1},
+        "from_stage": {"$ref": "#/$defs/stage"},
+        "to_stage": {"$ref": "#/$defs/stage"},
+        "actor": {"type": "string", "minLength": 1},
+        "decision": {"enum": ["ADVANCE", "RETURN", "REJECT", "BLOCK", "CANCEL"]},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "occurred_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "stage": {"enum": ["INTENT", "SPECIFICATION", "ASSESSMENT", "PLAN", "TASKS", "IMPLEMENTATION", "VERIFICATION", "CONVERGENCE", "REMEDIATION", "ACCEPTANCE"]}
+  }
+}

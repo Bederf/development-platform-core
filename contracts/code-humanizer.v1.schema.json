@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "code-humanizer.v1",
+  "title": "Code Humanizer Capability v1",
+  "description": "A consumer-neutral GSD capability request and candidate artifact. It never independently approves semantic changes; Forge does.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "capability", "version", "request_id", "action",
+    "acceptance", "artifact", "verification"
+  ],
+  "properties": {
+    "schema": {"const": "code-humanizer.v1"},
+    "capability": {"const": "code-humanizer"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "request_id": {"type": "string", "minLength": 1},
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "target", "profile", "aggression"],
+      "properties": {
+        "capability": {"const": "code-humanizer"},
+        "target": {"type": "string", "minLength": 1},
+        "profile": {"type": ["string", "null"], "minLength": 1},
+        "aggression": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_integrity", "lint", "tests", "forge_verification"],
+      "properties": {
+        "semantic_integrity": {"const": "required"},
+        "lint": {"const": "required"},
+        "tests": {"const": "required"},
+        "forge_verification": {"const": "required"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_artifact", "source_hash", "candidate_hash", "transformation_manifest"],
+      "properties": {
+        "candidate_artifact": {"$ref": "#/$defs/file"},
+        "source_hash": {"type": "string", "minLength": 1},
+        "candidate_hash": {"type": "string", "minLength": 1},
+        "transformation_manifest": {"$ref": "#/$defs/artifact_ref"}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delegated_to", "required_checks"],
+      "properties": {
+        "delegated_to": {"const": "forge"},
+        "required_checks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["semantic_integrity", "lint", "tests"]},
+          "minItems": 3
+        },
+        "verification_request_ref": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "content_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "content_hash": {"type": "string", "minLength": 1}
+      }
+    },
+    "artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "ref"],
+      "properties": {
+        "type": {"const": "artifact"},
+        "ref": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

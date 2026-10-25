@@ -1,0 +1,23 @@
+schema: development-workflow-conformance.v1
+contract: development-workflow.v1
+provider: FakeWorkflowProvider
+cases:
+  - id: complete-independent-verification
+    expected: ACCEPTED
+  - id: missing-gate-blocks-advance
+    expected: BLOCKED
+  - id: verification-failure-requires-remediation
+    expected: REMEDIATION
+  - id: verification-unavailable-requires-remediation
+    expected: REMEDIATION
+  - id: convergence-finds-traceability-gap
+    expected: REMEDIATION
+  - id: rejected-work-preserves-history
+    expected: REJECTED
+  - id: provider-cannot-self-certify
+    expected: BLOCKED
+  # FAIL_CLOSED means validation rejects the payload; it is not a workflow status.
+  - id: unsupported-version-fails-closed
+    expected: FAIL_CLOSED
+  - id: artifact-revision-lineage
+    expected: EXPLICIT

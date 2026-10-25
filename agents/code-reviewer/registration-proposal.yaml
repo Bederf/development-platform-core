@@ -1,0 +1,18 @@
+schema: agent-registration-proposal.v1
+proposal_id: development-platform-code-reviewer-1
+agent_id: development-platform-code-reviewer
+contract_ref: agents/code-reviewer/agent-operating-contract.json
+behavior_profile_ref: agents/code-reviewer/agent-operating-contract.json#/behavior_profile
+capability: independent_code_review
+authority:
+  read_only: true
+  recommend_only: true
+  execute: false
+  approval_required: true
+runtime_adapter: adapters.independent_review.IndependentReviewAdapter
+eligible_providers:
+  - gemini-3.1-flash-lite
+  - hermes
+  - codex-fresh-context
+  - claude-fresh-context
+activation_status: proposed

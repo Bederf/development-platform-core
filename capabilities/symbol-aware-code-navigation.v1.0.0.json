@@ -1,0 +1,20 @@
+{
+  "schema": "capability-definition.v1",
+  "entity_type": "capability_definition",
+  "capability_id": "symbol-aware-code-navigation",
+  "version": "1.0.0",
+  "lifecycle_status": "stable",
+  "classification": "optional",
+  "semantic_description": "Navigate and analyze source code through language-aware symbols and relationships, including definitions, references, implementations, imports, and call sites.",
+  "responsibilities": ["Resolve source-code symbols within a declared project scope.", "Report relationships among source symbols.", "Support impact analysis and symbol-preserving refactoring workflows."],
+  "non_responsibilities": ["Authorizing source-code changes.", "Replacing project tests or review authority.", "Installing or changing agent tooling implicitly."],
+  "semantic_operations": ["Declaration", "Observation", "Evaluation"],
+  "input_contracts": [], "output_contracts": [], "relationships": [], "profiles": [],
+  "policy_requirements": [], "constraint_requirements": [],
+  "conformance_requirements": ["structural", "behavioral"],
+  "compatibility_policy": {"semantic_type": "compatibility_policy", "id": "symbol-aware-code-navigation-compatibility", "version": "1.0.0"},
+  "issuer": "development-platform-core", "authority_binding": null,
+  "validity_scope": {"scope_type": "platform", "scope_id": "development-platform-core"},
+  "supersession": null,
+  "informative": {"summary": "Provider-neutral symbol navigation exposed to coding agents through a client adapter."}
+}

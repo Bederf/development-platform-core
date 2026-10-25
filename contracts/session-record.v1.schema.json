@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session-record.v1",
+  "title": "Development Session Record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "record_id", "source", "session", "events", "artifacts", "checks", "integrity"],
+  "properties": {
+    "schema": {"const": "session-record.v1"},
+    "record_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"},
+    "source": {
+      "type": "object", "additionalProperties": false, "required": ["project", "collector_version"],
+      "properties": {
+        "project": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+        "collector_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["execution_id", "lineage_id", "collector_attestation"],
+      "properties": {
+        "execution_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"},
+        "lineage_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"},
+        "parent_record_ids": {
+          "type": "array", "uniqueItems": true, "maxItems": 32,
+          "items": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"}
+        },
+        "collector_attestation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["attestation_id", "method", "record_digest", "attested_at"],
+          "properties": {
+            "attestation_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"},
+            "method": {"const": "collector-integrity-binding-v1"},
+            "record_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            "attested_at": {"type": "string", "format": "date-time"}
+          }
+        }
+      }
+    },
+    "session": {
+      "type": "object", "additionalProperties": false, "required": ["session_id", "started_at", "ended_at", "outcome"],
+      "properties": {
+        "session_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,160}$"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "ended_at": {"type": "string", "format": "date-time"},
+        "outcome": {"enum": ["complete", "failed", "blocked", "interrupted", "unknown"]}
+      }
+    },
+    "events": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["event_type", "timestamp"],
+        "properties": {
+          "event_type": {"type": "string", "pattern": "^[a-z0-9][a-z0-9:._-]{0,127}$"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["path"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).{1,500}$"},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "size_bytes": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "checks": {
+      "type": "array", "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["name", "passed"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,200}$"},
+          "passed": {"type": "boolean"}
+        }
+      }
+    },
+    "integrity": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "key_id", "signature"],
+      "properties": {
+        "algorithm": {"const": "HMAC-SHA256"},
+        "key_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$"},
+        "signature": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43}$"}
+      }
+    }
+  }
+}

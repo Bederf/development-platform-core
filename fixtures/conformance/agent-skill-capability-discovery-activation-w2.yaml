@@ -1,0 +1,95 @@
+schema: agent-skill-capability-discovery-activation-enforcement.v1
+status: candidate-qualification
+authority: fixture-expectations-only
+description: >-
+  W2 provider-free enforcement observations for the W1 Agent/Skill/Capability
+  boundary scenarios. This fixture does not establish runtime or provider
+  conformance.
+cases:
+  - id: positive-one-shot-capability-dispatch
+    broker_observation: authorized_dispatch
+    adapter_dispatches: 1
+    verification: pending
+  - id: discovery-is-not-conformance
+    broker_observation: rejected_unresolved_binding
+    adapter_dispatches: 0
+  - id: unselected-capability
+    broker_observation: rejected_selection_mismatch
+    adapter_dispatches: 0
+  - id: skill-instruction-cannot-authorize
+    broker_observation: rejected_missing_policy
+    adapter_dispatches: 0
+  - id: policy-subject-tool-mismatch
+    broker_observation: rejected_policy_subject_mismatch
+    adapter_dispatches: 0
+  - id: stale-activation
+    broker_observation: rejected_stale_activation
+    adapter_dispatches: 0
+  - id: unavailable-discovery
+    broker_observation: blocked_prerequisite_unavailable
+    adapter_dispatches: 0
+  - id: jev-score-is-not-authorization
+    broker_observation: rejected_missing_policy
+    adapter_dispatches: 0
+  - id: mcp-result-is-not-verification
+    broker_observation: authorized_dispatch
+    adapter_dispatches: 1
+    verification: pending
+edge_cases:
+  - id: arguments-digest-mismatch
+    broker_observation: rejected_input_digest
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: revoked-policy
+    broker_observation: rejected_policy_revoked
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: expired-policy
+    broker_observation: rejected_policy_expired
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: broker-state-unavailable
+    broker_observation: blocked_broker_unavailable
+    adapter_dispatches: 0
+    expected_execution: unknown
+  - id: duplicate-retry-attempt
+    broker_observation: rejected_duplicate_attempt
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: bounded-retry-new-attempt
+    broker_observation: authorized_dispatch
+    adapter_dispatches: 1
+    expected_execution: completed
+    predecessor_preserved: true
+  - id: adapter-timeout
+    broker_observation: authorized_dispatch
+    adapter_dispatches: 1
+    expected_execution: timeout
+    verification: pending
+  - id: partial-effect
+    broker_observation: authorized_dispatch
+    adapter_dispatches: 1
+    expected_execution: partial
+    verification: pending
+adversarial_cases:
+  - id: direct-mcp-bypass
+    broker_observation: bypass-rejected
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: provider-forged-policy-allow
+    broker_observation: rejected_missing_policy
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: provider-expands-activated-tool-surface
+    broker_observation: rejected_scope_mismatch
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: discovery-injects-credential
+    broker_observation: rejected_untrusted_input
+    adapter_dispatches: 0
+    expected_execution: not_run
+  - id: forged-evidence-from-transport
+    broker_observation: evidence-not-admitted
+    adapter_dispatches: 1
+    expected_execution: completed
+    verification: pending

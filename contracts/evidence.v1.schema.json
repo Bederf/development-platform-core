@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence.v1",
+  "title": "Evidence Contract Family v1 Candidate",
+  "oneOf": [{"$ref": "#/$defs/submission"}, {"$ref": "#/$defs/record"}],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "time": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"},
+    "ref": {
+      "type": "object", "additionalProperties": false, "required": ["semantic_type", "id", "version"],
+      "properties": {
+        "semantic_type": {"$ref": "#/$defs/id"}, "id": {"$ref": "#/$defs/id"}, "version": {"type": "string", "minLength": 1},
+        "digest": {"$ref": "#/$defs/digest"}, "issuer": {"type": "string", "minLength": 1}
+      }
+    },
+    "immutable_ref": {"allOf": [{"$ref": "#/$defs/ref"}, {"required": ["digest"]}]},
+    "candidate_ref": {
+      "allOf": [
+        {"$ref": "#/$defs/immutable_ref"},
+        {"properties": {"semantic_type": {"enum": ["observation", "artifact", "evaluation_result", "attestation"]}}}
+      ]
+    },
+    "submission_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evidence_submission"}}}]},
+    "evaluation_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evaluation_result"}}}]},
+    "policy_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "policy_decision"}}}]},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["scope_type", "scope_id", "profile"],
+      "properties": {"scope_type": {"$ref": "#/$defs/id"}, "scope_id": {"type": "string", "minLength": 1}, "profile": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}}
+    },
+    "availability": {
+      "type": "object", "additionalProperties": false, "required": ["status", "reason"],
+      "properties": {"status": {"enum": ["assessed", "not_assessed", "unavailable", "not_applicable"]}, "reason": {"type": ["string", "null"], "minLength": 1}},
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "assessed"}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "null"}}}},
+        {"if": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "submission": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "submission_id", "candidate", "subject", "representation", "source", "producer", "collection_method", "provenance", "claimed_supports", "limitations", "limitations_availability", "observed_at", "submitted_by", "submitted_at", "validity_scope", "lineage", "digest"],
+      "properties": {
+        "schema": {"const": "evidence.v1"}, "entity_type": {"const": "evidence_submission"}, "submission_id": {"$ref": "#/$defs/id"},
+        "candidate": {"$ref": "#/$defs/candidate_ref"}, "subject": {"$ref": "#/$defs/immutable_ref"},
+        "representation": {"type": "string", "minLength": 1}, "source": {"$ref": "#/$defs/ref"}, "producer": {"$ref": "#/$defs/ref"},
+        "collection_method": {"$ref": "#/$defs/ref"}, "provenance": {"$ref": "#/$defs/immutable_ref"},
+        "claimed_supports": {"type": "array", "items": {"$ref": "#/$defs/ref"}},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}, "limitations_availability": {"$ref": "#/$defs/availability"},
+        "observed_at": {"$ref": "#/$defs/time"}, "submitted_by": {"$ref": "#/$defs/ref"}, "submitted_at": {"$ref": "#/$defs/time"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "lineage": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "digest": {"$ref": "#/$defs/digest"}
+      },
+      "allOf": [{"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}}]
+    },
+    "record": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "evidence_id", "version", "submission", "candidate", "admission_evaluation", "admission_policy_decision", "admission_policy_use_id", "admission_policy_use_index", "subject", "issuer", "authority_binding", "provenance", "supports", "limitations", "limitations_availability", "validity_scope", "issued_at", "valid_until", "lineage", "supersession", "digest"],
+      "properties": {
+        "schema": {"const": "evidence.v1"}, "entity_type": {"const": "evidence_record"}, "evidence_id": {"$ref": "#/$defs/id"},
+        "version": {"type": "string", "minLength": 1}, "submission": {"$ref": "#/$defs/submission_ref"}, "candidate": {"$ref": "#/$defs/candidate_ref"},
+        "admission_evaluation": {"$ref": "#/$defs/evaluation_ref"}, "admission_policy_decision": {"$ref": "#/$defs/policy_ref"},
+        "admission_policy_use_id": {"$ref": "#/$defs/id"}, "admission_policy_use_index": {"type": "integer", "minimum": 1},
+        "subject": {"$ref": "#/$defs/immutable_ref"}, "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"},
+        "provenance": {"$ref": "#/$defs/immutable_ref"}, "supports": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/ref"}},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}, "limitations_availability": {"$ref": "#/$defs/availability"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "issued_at": {"$ref": "#/$defs/time"}, "valid_until": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]},
+        "lineage": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/ref"}}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]},
+        "digest": {"$ref": "#/$defs/digest"}
+      },
+      "allOf": [{"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}}]
+    }
+  }
+}

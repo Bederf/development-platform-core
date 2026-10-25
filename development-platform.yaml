@@ -1,0 +1,49 @@
+schema: development-platform.v1
+
+project:
+  id: development-platform-core
+  root: .
+  knowledge_root: vault/
+  planning_root: 00-GSD-Phases/
+
+repository_intelligence:
+  enabled: true
+  provider: code-review-graph
+  freshness_policy: bounded
+  degraded_mode: startup-without-trusted-context
+
+agents:
+  claude: true
+  codex: true
+  opencode: true
+
+gsd:
+  enabled: true
+  session_governance: contracts/gsd-session-governance.v1.schema.json
+  planning_root: 00-GSD-Phases/
+  task_authority: vault/99-Tasks/TODO.md
+
+acceptance_session:
+  required: true
+  context_path: .gsd-engine/acceptance/founder-session-p050-20261018.json
+  context_digest: sha256:a4afca8d191f4320f34d8ece2b7bd7987666ac1750f0409ca61b01733f1a8826
+
+session_brief:
+  enabled: false
+
+runtime_history:
+  enabled: true
+  database_path: .runtime/store.db
+
+forge:
+  enabled: false
+
+herdr:
+  enabled: false
+  lifecycle_transport: false
+
+runtime:
+  enabled: false
+
+batch:
+  enabled: false

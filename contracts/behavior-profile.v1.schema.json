@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "behavior-profile.v1",
+  "title": "Behavior Profile v1",
+  "description": "Framework-neutral behavioral profile. It must not grant authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "profile_id", "version", "total_points", "elements"],
+  "properties": {
+    "schema": {"const": "behavior-profile.v1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "total_points": {"const": 100},
+    "elements": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "points", "characteristics"],
+          "properties": {
+            "name": {"const": "fire"}, "points": {"type": "integer", "minimum": 0, "maximum": 100},
+            "characteristics": {"const": ["initiative", "decisiveness", "confidence", "momentum", "challenge"]}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "points", "characteristics"],
+          "properties": {
+            "name": {"const": "air"}, "points": {"type": "integer", "minimum": 0, "maximum": 100},
+            "characteristics": {"const": ["analysis", "curiosity", "communication", "creativity", "exploration"]}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "points", "characteristics"],
+          "properties": {
+            "name": {"const": "earth"}, "points": {"type": "integer", "minimum": 0, "maximum": 100},
+            "characteristics": {"const": ["discipline", "reliability", "precision", "stability", "process"]}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "points", "characteristics"],
+          "properties": {
+            "name": {"const": "water"}, "points": {"type": "integer", "minimum": 0, "maximum": 100},
+            "characteristics": {"const": ["empathy", "collaboration", "patience", "adaptability", "listening"]}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "points", "characteristics"],
+          "properties": {
+            "name": {"const": "ether"}, "points": {"type": "integer", "minimum": 0, "maximum": 100},
+            "characteristics": {"const": ["purpose", "wisdom", "reflection", "integration", "long-term-thinking"]}
+          }
+        }
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "change_record": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["reason", "actor", "occurred_at", "expected_effect"],
+      "properties": {
+        "reason": {"type": "string", "minLength": 1},
+        "actor": {"type": "string", "minLength": 1},
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "expected_effect": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "x-validation": [
+    "elements must contain exactly one of each elemental name",
+    "the sum of elements[*].points must equal total_points",
+    "characteristics are behavioral descriptors and never authority grants"
+  ]
+}

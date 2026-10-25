@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+CORE_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+exec python3 "$CORE_ROOT/scripts/security-audit-build.py" "$@"

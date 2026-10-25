@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "founder-acceptance-session.v1",
+  "title": "Founder Acceptance Session v1",
+  "description": "A durable, content-bound context that permits concise confirmations for already-prepared bounded decisions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "session_id", "authority_subject", "authentication", "authority_basis_refs", "authority_roles", "scope", "exclusions", "confirmation_policy", "opened_at", "status", "digest"],
+  "properties": {
+    "schema": {"const": "founder-acceptance-session.v1"},
+    "session_id": {"type": "string", "minLength": 1},
+    "authority_subject": {"type": "string", "minLength": 1},
+    "authentication": {"$ref": "#/$defs/authentication"},
+    "authority_basis_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "authority_roles": {"$ref": "#/$defs/roles"},
+    "operational_custody": {"$ref": "#/$defs/operational_custody"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "exclusions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "confirmation_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted_tokens", "requires_prepared_decision", "does_not_bypass_gates"],
+      "properties": {
+        "accepted_tokens": {"const": ["yes"]},
+        "requires_prepared_decision": {"const": true},
+        "does_not_bypass_gates": {"const": true}
+      }
+    },
+    "opened_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["OPEN", "CLOSED", "REVOKED"]},
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "credential_ref", "verified_at", "verification_ref"],
+      "properties": {
+        "method": {"enum": ["password", "hardware-key", "platform-sso", "existing-governance-evidence"]},
+        "credential_ref": {"type": "string", "minLength": 1, "description": "Reference only; never the secret."},
+        "verified_at": {"type": "string", "format": "date-time"},
+        "verification_ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_ids", "allowed_actions", "specification_bindings"],
+      "properties": {
+        "phase_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "allowed_actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "specification_bindings": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/binding"}}
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_id", "specification_ref", "specification_hash", "review_required", "review_provider_ref"],
+      "properties": {
+        "phase_id": {"type": "string", "minLength": 1},
+        "specification_ref": {"type": "string", "minLength": 1},
+        "specification_hash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "review_required": {"type": "boolean"},
+        "review_provider_ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "implementer", "acceptance"],
+      "properties": {
+        "owner": {"type": "string", "minLength": 1},
+        "implementer": {"type": "string", "minLength": 1},
+        "acceptance": {"type": "string", "minLength": 1}
+      }
+    },
+    "operational_custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["custodian_subject", "custody_scope", "authority_basis_ref", "delegated"],
+      "properties": {
+        "custodian_subject": {"type": "string", "minLength": 1},
+        "custody_scope": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "authority_basis_ref": {"type": "string", "minLength": 1},
+        "delegated": {"type": "boolean"}
+      }
+    }
+  }
+}

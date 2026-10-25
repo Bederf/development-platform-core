@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Repository entry point for the Core-owned Radix CLI."""
+
+from pathlib import Path
+import sys
+
+
+CORE_ROOT = Path(__file__).resolve().parent
+if str(CORE_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORE_ROOT))
+
+from adapters.radix.cli import main  # noqa: E402
+
+
+raise SystemExit(main())

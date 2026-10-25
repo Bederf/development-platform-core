@@ -1,0 +1,125 @@
+fixture_format: pre-schema-semantic-fixture.v1
+category: regression
+fixtures:
+  - fixture_id: REG-001
+    title: Declaration never inherits authority from publication
+    given:
+      declaration: fixture.declaration.public
+      publication_status: published
+      authority_binding: null
+    when: evaluate authority
+    expected:
+      verdict: PASS
+      outcome: authority-remains-unestablished
+      reason_codes: [DECLARATION_NOT_AUTHORITY]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: []
+      relationships: []
+      conformance_dimensions: {semantic: satisfied}
+
+  - fixture_id: REG-002
+    title: Runtime success remains an observation until evaluated
+    given:
+      execution_status: succeeded
+      runtime_observation: fixture.observation.exit-zero
+      evaluation: null
+    when: derive acceptance status
+    expected:
+      verdict: PASS
+      outcome: acceptance-remains-unknown
+      reason_codes: [EXECUTION_NOT_SUCCESS, OBSERVATION_NOT_TRUTH]
+    covers:
+      operations: [Execution, Observation, Evaluation]
+      invariants: [2, 3, 10]
+      relationships: []
+      conformance_dimensions: {semantic: satisfied}
+
+  - fixture_id: REG-003
+    title: Policy exception preserves failed evidence
+    given:
+      evidence_record: {id: fixture.evidence.failed, result: failed}
+      policy_decision: {outcome: conditional, exception: fixture.exception.1}
+    when: materialize policy decision
+    expected:
+      verdict: PASS
+      outcome: evidence-failed-policy-conditional
+      reason_codes: [EVIDENCE_IMMUTABLE, POLICY_SEPARATE]
+    covers:
+      operations: [Evaluation, Resolution]
+      invariants: [1, 10]
+      relationships: []
+      conformance_dimensions: {behavioral: satisfied}
+
+  - fixture_id: REG-004
+    title: Unknown provenance remains unknown after normalization
+    given:
+      source_provenance: null
+      normalized_provenance: null
+      limitation: provenance-unavailable
+    when: evaluate lineage honesty
+    expected:
+      verdict: PASS
+      outcome: unknown-preserved
+      reason_codes: [MISSING_REMAINS_MISSING, LIMITATION_EXPLICIT]
+    covers:
+      operations: [Observation, Evaluation]
+      invariants: [11]
+      relationships: []
+      conformance_dimensions: {semantic: satisfied}
+
+  - fixture_id: REG-005
+    title: Normative text change triggers semantic compatibility assessment
+    given:
+      source_version: fixture.contract.tool@1.0.0
+      target_version: fixture.contract.tool@1.0.1
+      json_shape_changed: false
+      normative_description_changed: true
+    when: classify compatibility work
+    expected:
+      verdict: PASS
+      outcome: semantic-assessment-required
+      reason_codes: [NORMATIVE_TEXT_IS_CONTRACT, VERSION_NOT_PROOF]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: [7]
+      relationships: []
+      conformance_dimensions: {structural: satisfied, semantic: satisfied}
+
+  - fixture_id: REG-006
+    title: Optional provider package does not alter platform meaning
+    given:
+      package: fixture.package.provider-alpha
+      implementation_role: provider
+      relationship: {source: fixture.package.provider-alpha, type: DECLARES_PROVIDES, target: fixture.capability.optional-provider}
+      constitutional_changes: []
+      psm_changes: []
+    when: compose the optional package
+    expected:
+      verdict: PASS
+      outcome: implementation-remains-replaceable
+      reason_codes: [PROVIDER_NOT_CONSTITUTIONAL, CAPABILITY_SEMANTICS_PRESERVED]
+    covers:
+      operations: [Declaration, Resolution]
+      invariants: [13]
+      relationships: [DECLARES_PROVIDES]
+      conformance_dimensions: {semantic: satisfied}
+
+  - fixture_id: REG-007
+    title: Binding replacement retains immutable historical association
+    given:
+      new_binding: fixture.binding.evaluate-2
+      old_binding: fixture.binding.evaluate-1
+      relationship: REPLACES_BINDING
+      old_binding_immutable: true
+      replacement_reason: implementation-superseded
+    when: evaluate binding history
+    expected:
+      verdict: PASS
+      outcome: replacement-replayable
+      reason_codes: [HISTORY_PRESERVED, REPLACEMENT_ATTRIBUTABLE]
+    covers:
+      operations: [Resolution, Evaluation]
+      invariants: [8, 11]
+      relationships: [REPLACES_BINDING]
+      conformance_dimensions: {behavioral: satisfied}

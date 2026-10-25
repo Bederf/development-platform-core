@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "startup-context-projection.v1",
+  "title": "StartupContextProjection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "objective",
+    "task_selection",
+    "budget",
+    "brief",
+    "inline_sections",
+    "on_demand_sources"
+  ],
+  "properties": {
+    "schema": {"const": "startup-context-projection.v1"},
+    "project_id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "objective": {"type": "string", "minLength": 1},
+    "task_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "task_id", "reason"],
+      "properties": {
+        "strategy": {"const": "objective_relevance"},
+        "task_id": {"type": ["string", "null"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_tokens", "estimated_tokens", "truncated"],
+      "properties": {
+        "max_tokens": {"type": "integer", "minimum": 1, "maximum": 8000},
+        "estimated_tokens": {"type": "integer", "minimum": 0},
+        "truncated": {"type": "boolean"}
+      }
+    },
+    "brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "text"],
+      "properties": {
+        "status": {"enum": ["accepted", "regenerated", "unavailable"]},
+        "path": {"type": ["string", "null"]},
+        "text": {"type": ["string", "null"]}
+      }
+    },
+    "inline_sections": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/section"}
+    },
+    "on_demand_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "path", "reason"],
+        "properties": {
+          "source_id": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "working_state": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "candidate_id", "project_id", "session_id", "gsd_ref", "session_record_refs",
+        "source_digests", "objective", "phase", "completed_summary", "discovery_summary",
+        "failure_summary", "next_step", "blocker", "checkpointed_at", "reason",
+        "projection_digest"
+      ],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "project_id": {"type": "string", "minLength": 1},
+        "session_id": {"type": "string", "minLength": 1},
+        "gsd_ref": {"type": "string", "minLength": 1},
+        "session_record_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "source_digests": {"type": "object"},
+        "objective": {"type": "string", "minLength": 1},
+        "phase": {},
+        "completed_summary": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 32},
+        "discovery_summary": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 32},
+        "failure_summary": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 32},
+        "next_step": {"type": "string", "minLength": 1},
+        "blocker": {"type": "string", "minLength": 1},
+        "checkpointed_at": {"type": "string", "minLength": 1},
+        "reason": {"enum": ["startup", "transition", "handoff", "terminal"]},
+        "projection_digest": {"type": "string", "minLength": 1}
+      }
+    },
+    "working_state_lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["session_id", "resumed_from_candidate_id", "source_checkpoint_digest", "prior_session_id"],
+      "properties": {
+        "session_id": {"type": "string", "minLength": 1},
+        "resumed_from_candidate_id": {"type": "string", "minLength": 1},
+        "source_checkpoint_digest": {"type": "string", "minLength": 1},
+        "prior_session_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "path", "status"],
+        "properties": {
+          "ref": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "status": {"enum": ["available", "unavailable"]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "path",
+        "section_id",
+        "kind",
+        "authority",
+        "text",
+        "content_hash",
+        "estimated_tokens"
+      ],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "section_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["active", "reference"]},
+        "authority": {"enum": ["executable", "reference"]},
+        "text": {"type": "string", "minLength": 1},
+        "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "estimated_tokens": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

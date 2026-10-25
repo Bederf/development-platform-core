@@ -1,0 +1,571 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "capability-definition.v1",
+  "title": "Capability Definition Contract Family v1",
+  "description": "Provider-neutral declarations and governed results for capability definition, requirements, implementation claims, resolution, conformance, constraints, risk, and binding.",
+  "oneOf": [
+    {"$ref": "#/$defs/capability_definition"},
+    {"$ref": "#/$defs/capability_profile"},
+    {"$ref": "#/$defs/capability_relationship"},
+    {"$ref": "#/$defs/capability_requirement"},
+    {"$ref": "#/$defs/implementation_descriptor"},
+    {"$ref": "#/$defs/selection_result"},
+    {"$ref": "#/$defs/resolution_result"},
+    {"$ref": "#/$defs/conformance_claim"},
+    {"$ref": "#/$defs/constraint_reference"},
+    {"$ref": "#/$defs/risk_assessment_reference"},
+    {"$ref": "#/$defs/capability_binding"}
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "semantic_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version"],
+      "properties": {
+        "semantic_type": {"$ref": "#/$defs/identifier"},
+        "id": {"$ref": "#/$defs/identifier"},
+        "version": {"type": "string", "minLength": 1},
+        "digest": {"type": ["string", "null"], "minLength": 1},
+        "issuer": {"type": "string", "minLength": 1}
+      }
+    },
+    "nullable_reference": {
+      "oneOf": [
+        {"$ref": "#/$defs/reference"},
+        {"type": "null"}
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id"],
+      "properties": {
+        "scope_type": {"$ref": "#/$defs/identifier"},
+        "scope_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "informative": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {"type": "string"},
+        "rationale": {"type": "string"},
+        "display_label": {"type": "string"},
+        "documentation_refs": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "metadata": {"type": "object"}
+      }
+    },
+    "named_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value"],
+      "properties": {
+        "name": {"$ref": "#/$defs/identifier"},
+        "value": {"type": ["string", "number", "integer", "boolean"]},
+        "unit": {"type": ["string", "null"]}
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "operator"],
+      "properties": {
+        "subject": {"$ref": "#/$defs/reference"},
+        "operator": {"enum": ["equals", "not_equals", "in", "exists"]},
+        "value": {}
+      }
+    },
+    "reasoned_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "reason_codes"],
+      "properties": {
+        "subject": {"$ref": "#/$defs/reference"},
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/identifier"}
+        }
+      }
+    },
+    "profile_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "disposition"],
+      "properties": {
+        "profile": {"$ref": "#/$defs/reference"},
+        "disposition": {"enum": ["required", "allowed", "preferred", "prohibited"]}
+      }
+    },
+    "capability_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "capability_id", "version",
+        "lifecycle_status", "classification", "semantic_description",
+        "responsibilities", "non_responsibilities", "semantic_operations",
+        "input_contracts", "output_contracts", "relationships", "profiles",
+        "policy_requirements", "constraint_requirements",
+        "conformance_requirements", "compatibility_policy", "issuer",
+        "authority_binding", "validity_scope", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "capability_definition"},
+        "capability_id": {"$ref": "#/$defs/identifier"},
+        "version": {"$ref": "#/$defs/semantic_version"},
+        "lifecycle_status": {"enum": ["experimental", "stable", "deprecated", "withdrawn"]},
+        "classification": {"enum": ["platform_baseline", "optional"]},
+        "semantic_description": {"type": "string", "minLength": 1},
+        "responsibilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "non_responsibilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "semantic_operations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["Declaration", "Observation", "Resolution", "Execution", "Evaluation"]}
+        },
+        "operation_descriptors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/operation_descriptor"}
+        },
+        "input_contracts": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "output_contracts": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "relationships": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "profiles": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "policy_requirements": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "constraint_requirements": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "conformance_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["structural", "semantic", "behavioral", "operational"]}
+        },
+        "compatibility_policy": {"$ref": "#/$defs/reference"},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "operation_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id", "input_contracts", "output_contracts",
+        "authority_requirements", "side_effect_classification",
+        "idempotency", "verification_strategy", "supported_implementations"
+      ],
+      "properties": {
+        "operation_id": {"$ref": "#/$defs/identifier"},
+        "input_contracts": {
+          "type": "array", "minItems": 1,
+          "items": {"$ref": "#/$defs/reference"}
+        },
+        "output_contracts": {
+          "type": "array", "minItems": 1,
+          "items": {"$ref": "#/$defs/reference"}
+        },
+        "authority_requirements": {
+          "type": "array", "items": {"$ref": "#/$defs/reference"}
+        },
+        "side_effect_classification": {
+          "enum": ["none", "read_only", "state_change", "external_effect", "irreversible_effect"]
+        },
+        "idempotency": {
+          "enum": ["idempotent", "conditionally_idempotent", "non_idempotent", "unknown"]
+        },
+        "verification_strategy": {"$ref": "#/$defs/reference"},
+        "supported_implementations": {
+          "type": "array", "items": {"$ref": "#/$defs/reference"}
+        },
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "capability_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "profile_id", "version",
+        "semantic_description", "base_capability",
+        "additional_responsibilities", "additional_constraints",
+        "input_contracts", "output_contracts", "conformance_requirements",
+        "compatibility_policy", "issuer", "authority_binding",
+        "validity_scope", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "capability_profile"},
+        "profile_id": {"$ref": "#/$defs/identifier"},
+        "version": {"$ref": "#/$defs/semantic_version"},
+        "semantic_description": {"type": "string", "minLength": 1},
+        "base_capability": {"$ref": "#/$defs/reference"},
+        "additional_responsibilities": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "additional_constraints": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "input_contracts": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "output_contracts": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "conformance_requirements": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["structural", "semantic", "behavioral", "operational"]}},
+        "compatibility_policy": {"$ref": "#/$defs/reference"},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "capability_relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "relationship_id", "relationship_type",
+        "source", "targets", "cardinality", "compatibility_expectations",
+        "issuer", "authority_binding", "validity_scope", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "capability_relationship"},
+        "relationship_id": {"$ref": "#/$defs/identifier"},
+        "relationship_type": {"enum": ["REQUIRES", "OPTIONALLY_USES", "CONFLICTS_WITH", "EXTENDS", "DECLARES_PROVIDES", "CONFORMS_TO", "SUPERSEDES", "REPLACES_BINDING"]},
+        "source": {"$ref": "#/$defs/reference"},
+        "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/reference"}},
+        "cardinality": {"enum": ["one", "one_or_more"]},
+        "compatibility_expectations": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"relationship_type": {"enum": ["REQUIRES", "OPTIONALLY_USES"]}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile"]}}},
+              "targets": {"maxItems": 1, "items": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile"]}}}},
+              "cardinality": {"const": "one"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"relationship_type": {"const": "CONFLICTS_WITH"}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile", "capability_requirement"]}}},
+              "targets": {"maxItems": 1, "items": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile", "capability_requirement"]}}}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"relationship_type": {"const": "EXTENDS"}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"const": "capability_definition"}}},
+              "targets": {"maxItems": 1, "items": {"properties": {"semantic_type": {"const": "capability_definition"}}}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"relationship_type": {"const": "DECLARES_PROVIDES"}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"const": "implementation_descriptor"}}},
+              "targets": {"maxItems": 1, "items": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile"]}}}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"relationship_type": {"const": "CONFORMS_TO"}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"const": "conformance_claim"}}},
+              "targets": {
+                "minItems": 2,
+                "maxItems": 2,
+                "contains": {"properties": {"semantic_type": {"const": "implementation_descriptor"}}},
+                "allOf": [
+                  {"contains": {"properties": {"semantic_type": {"enum": ["capability_definition", "capability_profile"]}}}}
+                ]
+              },
+              "cardinality": {"const": "one_or_more"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"relationship_type": {"const": "REPLACES_BINDING"}}, "required": ["relationship_type"]},
+          "then": {
+            "properties": {
+              "source": {"properties": {"semantic_type": {"const": "capability_binding"}}},
+              "targets": {"maxItems": 1, "items": {"properties": {"semantic_type": {"const": "capability_binding"}}}}
+            }
+          }
+        }
+      ]
+    },
+    "capability_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "requirement_id", "capability",
+        "profile_requirements", "strength", "issuer", "authority_binding",
+        "source_class", "validity_scope", "conditions", "constraints",
+        "policy_requirements", "compatibility_expectations", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "capability_requirement"},
+        "requirement_id": {"$ref": "#/$defs/identifier"},
+        "capability": {"$ref": "#/$defs/reference"},
+        "profile_requirements": {"type": "array", "items": {"$ref": "#/$defs/profile_requirement"}},
+        "strength": {"enum": ["required", "prohibited", "preferred", "optional", "conditional"]},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "source_class": {"enum": ["project", "template", "organization", "policy_package", "deployment_profile", "override"]},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "conditions": {"type": "array", "items": {"$ref": "#/$defs/condition"}},
+        "constraints": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "policy_requirements": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "compatibility_expectations": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "preference_weight": {"type": "number", "minimum": 0},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "implementation_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "implementation_id", "version", "digest",
+        "lifecycle_status", "roles", "declared_capabilities",
+        "supported_contracts", "operating_constraints",
+        "resource_characteristics", "required_capabilities",
+        "credential_references", "compatibility_declarations", "issuer",
+        "authority_binding", "validity_scope", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "implementation_descriptor"},
+        "implementation_id": {"$ref": "#/$defs/identifier"},
+        "version": {"$ref": "#/$defs/semantic_version"},
+        "digest": {"type": ["string", "null"], "minLength": 1},
+        "lifecycle_status": {"enum": ["experimental", "stable", "deprecated", "withdrawn"]},
+        "roles": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["library", "plugin", "local_process", "remote_process", "service", "distributed_cluster", "compile_time", "runtime", "provider", "adapter"]}},
+        "declared_capabilities": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "supported_contracts": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "operating_constraints": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "resource_characteristics": {"type": "array", "items": {"$ref": "#/$defs/named_value"}},
+        "required_capabilities": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "credential_references": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "compatibility_declarations": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "selection_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "selection_id", "requirement",
+        "eligible_candidates", "method", "evaluated_constraints", "outcome",
+        "selected_candidate", "rejected_candidates", "unresolved",
+        "direct_inputs", "issuer", "limitations", "validity_scope",
+        "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "selection_result"},
+        "selection_id": {"$ref": "#/$defs/identifier"},
+        "requirement": {"$ref": "#/$defs/reference"},
+        "eligible_candidates": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "method": {"$ref": "#/$defs/reference"},
+        "evaluated_constraints": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "outcome": {"enum": ["selected", "unresolved", "no_candidate"]},
+        "selected_candidate": {"$ref": "#/$defs/nullable_reference"},
+        "rejected_candidates": {"type": "array", "items": {"$ref": "#/$defs/reasoned_reference"}},
+        "unresolved": {"type": "array", "items": {"$ref": "#/$defs/reasoned_reference"}},
+        "direct_inputs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "issuer": {"type": "string", "minLength": 1},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"outcome": {"const": "selected"}}, "required": ["outcome"]},
+          "then": {"properties": {"selected_candidate": {"$ref": "#/$defs/reference"}}},
+          "else": {"properties": {"selected_candidate": {"type": "null"}}}
+        }
+      ]
+    },
+    "resolution_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "resolution_id", "resolution_kind",
+        "inputs", "method", "derived_outputs", "rejected_inputs",
+        "unresolved", "issuer", "limitations", "validity_scope",
+        "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "resolution_result"},
+        "resolution_id": {"$ref": "#/$defs/identifier"},
+        "resolution_kind": {"$ref": "#/$defs/identifier"},
+        "inputs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "method": {"$ref": "#/$defs/reference"},
+        "derived_outputs": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "rejected_inputs": {"type": "array", "items": {"$ref": "#/$defs/reasoned_reference"}},
+        "unresolved": {"type": "array", "items": {"$ref": "#/$defs/reasoned_reference"}},
+        "issuer": {"type": "string", "minLength": 1},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "conformance_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "claim_id", "subject", "capability",
+        "contracts", "dimension", "outcome", "method", "environment",
+        "supports", "issuer", "authority_binding", "assessment_time",
+        "validity", "limitations", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "conformance_claim"},
+        "claim_id": {"$ref": "#/$defs/identifier"},
+        "subject": {"$ref": "#/$defs/reference"},
+        "capability": {"$ref": "#/$defs/reference"},
+        "contracts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "dimension": {"enum": ["structural", "semantic", "behavioral", "operational"]},
+        "outcome": {"enum": ["satisfied", "failed", "unknown", "expired"]},
+        "method": {"$ref": "#/$defs/reference"},
+        "environment": {"$ref": "#/$defs/reference"},
+        "supports": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "assessment_time": {"type": "string", "format": "date-time"},
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scope", "valid_until"],
+          "properties": {
+            "scope": {"$ref": "#/$defs/scope"},
+            "valid_until": {"type": ["string", "null"], "format": "date-time"}
+          }
+        },
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "constraint_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "constraint_reference_id", "constraint",
+        "subject", "strength", "issuer", "authority_binding",
+        "evaluation_method", "validity_scope", "valid_until", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "constraint_reference"},
+        "constraint_reference_id": {"$ref": "#/$defs/identifier"},
+        "constraint": {"$ref": "#/$defs/reference"},
+        "subject": {"$ref": "#/$defs/reference"},
+        "strength": {"enum": ["hard", "soft"]},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "evaluation_method": {"$ref": "#/$defs/reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "valid_until": {"type": ["string", "null"], "format": "date-time"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "risk_assessment_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "risk_reference_id", "assessment", "subject",
+        "risk_model", "hazards", "inherent_risk", "controls",
+        "residual_risk", "uncertainty", "issuer", "authority_binding",
+        "supports", "assessment_time", "valid_until", "validity_scope",
+        "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "risk_assessment_reference"},
+        "risk_reference_id": {"$ref": "#/$defs/identifier"},
+        "assessment": {"$ref": "#/$defs/reference"},
+        "subject": {"$ref": "#/$defs/reference"},
+        "risk_model": {"$ref": "#/$defs/reference"},
+        "hazards": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "inherent_risk": {"type": "string", "minLength": 1},
+        "controls": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "residual_risk": {"type": "string", "minLength": 1},
+        "uncertainty": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/nullable_reference"},
+        "supports": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "assessment_time": {"type": "string", "format": "date-time"},
+        "valid_until": {"type": ["string", "null"], "format": "date-time"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    },
+    "capability_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "entity_type", "binding_id", "requirement", "capability",
+        "implementation", "contracts", "selection_result",
+        "conformance_claims", "constraints", "risk_assessment",
+        "policy_decision", "issuer", "authority_binding", "validity_scope",
+        "lifecycle_status", "supersession"
+      ],
+      "properties": {
+        "schema": {"const": "capability-definition.v1"},
+        "entity_type": {"const": "capability_binding"},
+        "binding_id": {"$ref": "#/$defs/identifier"},
+        "requirement": {"$ref": "#/$defs/reference"},
+        "capability": {"$ref": "#/$defs/reference"},
+        "implementation": {"$ref": "#/$defs/reference"},
+        "contracts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "selection_result": {"$ref": "#/$defs/reference"},
+        "conformance_claims": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+        "constraints": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+        "risk_assessment": {"$ref": "#/$defs/nullable_reference"},
+        "policy_decision": {"$ref": "#/$defs/reference"},
+        "issuer": {"type": "string", "minLength": 1},
+        "authority_binding": {"$ref": "#/$defs/reference"},
+        "validity_scope": {"$ref": "#/$defs/scope"},
+        "lifecycle_status": {"enum": ["proposed", "active", "suspended", "superseded", "revoked", "expired"]},
+        "supersession": {"$ref": "#/$defs/nullable_reference"},
+        "informative": {"$ref": "#/$defs/informative"}
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "contract-authority-projection.v1",
+  "record_type": "contract_authority_projection",
+  "projection_id": "finding-disposition-authority-projection",
+  "contract": {
+    "family": "finding-disposition",
+    "version": "1.0.0",
+    "schema_id": "finding-disposition.v1",
+    "schema_digest": "sha256:af81ed82b3cb4c9fbac7fa34d899f574d9919a07222cdee76af2007be3cbb02b",
+    "issuer": "core"
+  },
+  "authority": {
+    "disposition": "candidate",
+    "promotion_decision_ref": null,
+    "authority_binding_ref": null,
+    "historical_identity_exception_ref": {
+      "semantic_type": "historical_path_identity_exception",
+      "id": "finding-disposition-id-exception",
+      "version": "1.0.0",
+      "digest": "sha256:1a37032fe616af4dfff9e547bdf37f82556bb7b17b57c7e280664ac58e81987f"
+    },
+    "validity_scope": null
+  },
+  "status_dimensions": {
+    "implementation": { "status": "absent", "evidence_refs": [] },
+    "conformance": { "status": "not_assessed", "evidence_refs": [] },
+    "qualification": { "status": "not_assessed", "evidence_refs": [] },
+    "lifecycle": { "status": "active", "supersession_ref": null, "deprecation_ref": null },
+    "baseline": { "freeze_status": "not_in_baseline", "evidence_refs": [] }
+  },
+  "evidence": [],
+  "reconciliation": {
+    "outcome": "VALID",
+    "reason_codes": ["HISTORICAL_IDENTITY_EXCEPTION_APPLIED"],
+    "blocking": false
+  },
+  "admissibility": {
+    "contract_authoritative": false,
+    "contract_use": "semantic_reference",
+    "blocked_reasons": []
+  },
+  "provenance": {
+    "source_revision": "git-ref:refs/tags/core-authority/finding-disposition-source-state-v1",
+    "source_digests": [
+      "sha256:af81ed82b3cb4c9fbac7fa34d899f574d9919a07222cdee76af2007be3cbb02b",
+      "sha256:a2fb89cc33e74e8e05e49a7a6b14f45285bab582a2aadd5348db7db7339ad128",
+      "sha256:1a37032fe616af4dfff9e547bdf37f82556bb7b17b57c7e280664ac58e81987f"
+    ],
+    "reproducibility": { "status": "reproducible" },
+    "projection_digest": "sha256:5bf3dff050af1f6eb38bc733fa691173b4ed09a1649b0623f6b10e0034913d6b"
+  }
+}

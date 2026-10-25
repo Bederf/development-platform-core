@@ -1,0 +1,62 @@
+{
+  "schema": "capability-definition.v1",
+  "entity_type": "capability_definition",
+  "capability_id": "governed.engineering.loop",
+  "version": "1.0.0",
+  "lifecycle_status": "experimental",
+  "classification": "platform_baseline",
+  "semantic_description": "Provider-neutral contract for compiling bounded project context and executing an authorized engineering plan through implementation, testing, review, verification, and close-out.",
+  "responsibilities": [
+    "Treat project snapshots as provenance-aware derived context and never as authority.",
+    "Require independently resolvable authorization for state-changing work.",
+    "Represent bounded execution scope and protected-boundary escalation.",
+    "Guide owners through unresolved decisions without inventing policy.",
+    "Permit uninterrupted in-scope execution after plan authorization.",
+    "Preserve evidence, uncertainty, lifecycle, execution, and verification lineage."
+  ],
+  "non_responsibilities": [
+    "Granting application, production, or external-system authority.",
+    "Selecting or redefining project-owned policy.",
+    "Loading or starting a harness, skill, plugin, or MCP implementation.",
+    "Defining Codex, Claude, DSH, or other provider-specific interfaces.",
+    "Replacing independent verification or acceptance."
+  ],
+  "semantic_operations": ["Declaration", "Observation", "Resolution", "Execution", "Evaluation"],
+  "input_contracts": [
+    {"semantic_type": "agent-startup-context", "id": "agent-startup-context.v1", "version": "1.0.0"},
+    {"semantic_type": "policy-decision", "id": "policy-decision.v1", "version": "1.0.0"},
+    {"semantic_type": "engineering-execution", "id": "engineering-execution.v1", "version": "1.0.0"},
+    {"semantic_type": "capability-projection", "id": "capability-projection.v1", "version": "1.0.0"}
+  ],
+  "output_contracts": [
+    {"semantic_type": "gsd-planning-lifecycle", "id": "gsd-planning-lifecycle.v1", "version": "1.0.0"},
+    {"semantic_type": "engineering-execution", "id": "engineering-execution.v1", "version": "1.0.0"},
+    {"semantic_type": "verification-result", "id": "verification-result.v1", "version": "1.0.0"},
+    {"semantic_type": "evidence", "id": "evidence.v1", "version": "1.0.0"},
+    {"semantic_type": "capability-projection", "id": "capability-projection.v1", "version": "1.0.0"}
+  ],
+  "relationships": [],
+  "profiles": [],
+  "policy_requirements": [
+    {"semantic_type": "policy-decision", "id": "policy-decision.v1", "version": "1.0.0"}
+  ],
+  "constraint_requirements": [],
+  "conformance_requirements": ["structural", "semantic", "behavioral"],
+  "compatibility_policy": {"semantic_type": "compatibility-policy", "id": "governed-engineering-loop-compatibility", "version": "1.0.0"},
+  "issuer": "development-platform-core",
+  "authority_binding": null,
+  "validity_scope": {"scope_type": "platform", "scope_id": "development-platform-core"},
+  "supersession": null,
+  "informative": {
+    "display_label": "Governed Engineering Loop",
+    "summary": "A harness-neutral execution capability projected into agent clients by adapters.",
+    "rationale": "Keep reusable execution semantics in Core while allowing each harness to choose its own skill format, invocation, and transport.",
+    "documentation_refs": [
+      "docs/specifications/GOVERNED-ENGINEERING-LOOP-v1.md",
+      "skills/governed-engineering-loop/SKILL.md"
+    ],
+    "metadata": {
+      "adapter_rule": "Harness adapters may project the contract but may not redefine its semantics."
+    }
+  }
+}

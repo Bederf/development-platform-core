@@ -1,0 +1,10 @@
+{
+  "fixture_status": "derived_compatibility_reference",
+  "workflow_id": "fixture-golden-run-20260922",
+  "approved_specification_ref": "specification:GOLDEN-001:v1.0.0",
+  "status": "accepted",
+  "authority_boundary": {
+    "production_authority_granted": false,
+    "external_effect": false
+  }
+}

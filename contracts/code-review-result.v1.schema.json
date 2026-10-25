@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "code-review-result.v1",
+  "title": "Provider-neutral code review result v1",
+  "description": "Evidence-linked review output from a read-only implementation reviewer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "review_id", "attempt_ref", "independence", "classification",
+    "providers", "findings", "disposition", "evidence", "generated_at"
+  ],
+  "properties": {
+    "schema": {"const": "code-review-result.v1"},
+    "review_id": {"type": "string", "minLength": 1},
+    "attempt_ref": {"type": "string", "minLength": 1},
+    "independence": {"enum": ["independent", "self_review", "unknown"]},
+    "classification": {"type": "object", "additionalProperties": {"type": ["boolean", "string", "null"]}},
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["considered", "selected", "skipped"],
+      "properties": {
+        "considered": {"type": "array", "items": {"type": "string"}},
+        "selected": {"type": "array", "items": {"type": "string"}},
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "reason"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "reason": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "confidence", "title", "description", "category", "evidence_ref", "recommendation", "source"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "severity": {"enum": ["blocker", "major", "minor", "advisory"]},
+          "confidence": {"enum": ["very_high", "high", "medium", "low", "very_low"]},
+          "title": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "category": {"type": "string", "minLength": 1},
+          "evidence_ref": {"type": ["string", "null"]},
+          "recommendation": {"type": "string", "minLength": 1},
+          "source": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "disposition": {"enum": ["PASS", "PASS_WITH_ADVISORIES", "CHANGES_REQUIRED", "INCOMPLETE_REVIEW", "BLOCKED"]},
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": {"type": "string", "minLength": 1},
+          "ref": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "generated_at": {"type": "string", "format": "date-time"}
+  }
+}

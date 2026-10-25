@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "humanizer-transformation-manifest.v1",
+  "title": "Humanizer Transformation Manifest v1",
+  "description": "Non-authoritative provenance for one Humanizer candidate transformation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "request_id", "target", "source_hash", "candidate_hash", "profile", "aggression", "changed", "rules"],
+  "properties": {
+    "schema": {"const": "humanizer-transformation-manifest.v1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "target": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "candidate_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "profile": {"type": ["string", "null"], "minLength": 1},
+    "aggression": {"type": "number", "minimum": 0, "maximum": 1},
+    "changed": {"type": "boolean"},
+    "rules": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

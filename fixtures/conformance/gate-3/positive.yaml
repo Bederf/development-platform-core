@@ -1,0 +1,153 @@
+fixture_format: pre-schema-semantic-fixture.v1
+category: positive
+fixtures:
+  - fixture_id: POS-001
+    title: Complete governed engineering chain
+    given:
+      declaration: fixture.requirement.compile
+      observation: fixture.source.revision-42
+      resolution: fixture.binding.compiler-alpha
+      authorization: fixture.policy.allow-execution
+      execution: fixture.execution.build-7
+      evaluation: fixture.evaluation.acceptance-7
+      direct_supports: [fixture.source.revision-42, fixture.execution.build-7]
+    when: represent the activity without collapsing semantic meanings
+    expected:
+      verdict: PASS
+      outcome: distinct-attributable-results
+      reason_codes: [SEMANTIC_OPERATIONS_PRESERVED, DIRECT_LINEAGE_PRESENT]
+    covers:
+      operations: [Declaration, Observation, Resolution, Execution, Evaluation]
+      invariants: [2, 3, 4, 10, 11]
+      relationships: []
+      conformance_dimensions: {}
+
+  - fixture_id: POS-002
+    title: Evidence-backed governed capability binding
+    given:
+      requirement: fixture.requirement.context
+      capability: fixture.capability.context@1.0.0
+      implementation: fixture.impl.context-alpha@sha256:1111
+      selection_result: fixture.selection.context-alpha
+      relationships:
+        - {source: fixture.impl.context-alpha, type: DECLARES_PROVIDES, target: fixture.capability.context}
+        - {source: fixture.claim.context-alpha, type: CONFORMS_TO, target: fixture.impl.context-alpha}
+      conformance_claims:
+        structural: {outcome: satisfied, supports: [fixture.evidence.structure]}
+        semantic: {outcome: satisfied, supports: [fixture.evidence.semantics]}
+        behavioral: {outcome: satisfied, supports: [fixture.evidence.behavior]}
+        operational: {outcome: satisfied, supports: [fixture.evidence.operation], valid_until: 2026-09-25T00:00:00Z}
+      policy_decision: fixture.policy.binding-allowed
+    when: establish a scoped binding
+    expected:
+      verdict: PASS
+      outcome: binding-active
+      reason_codes: [CONFORMANCE_SUPPORTED, POLICY_EXPLICIT, SCOPE_VALID]
+    covers:
+      operations: [Declaration, Resolution, Evaluation]
+      invariants: [4, 5, 10]
+      relationships: [DECLARES_PROVIDES, CONFORMS_TO]
+      conformance_dimensions:
+        structural: satisfied
+        semantic: satisfied
+        behavioral: satisfied
+        operational: satisfied
+
+  - fixture_id: POS-003
+    title: Required and optional capability relationships remain distinct
+    given:
+      capability: fixture.capability.compile
+      relationships:
+        - {type: REQUIRES, target: fixture.capability.source}
+        - {type: OPTIONALLY_USES, target: fixture.capability.cache}
+      available: [fixture.capability.source]
+    when: resolve dependency eligibility
+    expected:
+      verdict: PASS
+      outcome: required-satisfied-optional-absent
+      reason_codes: [REQUIRED_PRESENT, OPTIONAL_ABSENCE_ALLOWED]
+    covers:
+      operations: [Declaration, Resolution]
+      invariants: [5]
+      relationships: [REQUIRES, OPTIONALLY_USES]
+      conformance_dimensions: {}
+
+  - fixture_id: POS-004
+    title: Compatible profile extension strengthens the base
+    given:
+      source: fixture.capability.context-bounded@1.1.0
+      target: fixture.capability.context@1.0.0
+      relationship: EXTENDS
+      added_responsibility: enforce maximum compiled size
+      weakened_responsibilities: []
+      compatibility_claim: fixture.claim.context-extension
+    when: evaluate extension semantics
+    expected:
+      verdict: PASS
+      outcome: compatible-extension
+      reason_codes: [BASE_GUARANTEES_PRESERVED, COMPATIBILITY_SUPPORTED]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: [7]
+      relationships: [EXTENDS]
+      conformance_dimensions: {semantic: satisfied}
+
+  - fixture_id: POS-005
+    title: Lifecycle transition has decision and replayable history
+    given:
+      current_state: proposed
+      requested_state: active
+      transition_definition: fixture.lifecycle.activate
+      policy_decision: fixture.policy.transition-allowed
+      transition_record: fixture.transition.100
+      direct_supports: [fixture.policy.transition-allowed]
+    when: execute and record the transition
+    expected:
+      verdict: PASS
+      outcome: active-with-history
+      reason_codes: [TRANSITION_AUTHORIZED, HISTORY_REPLAYABLE]
+    covers:
+      operations: [Declaration, Resolution, Execution, Observation]
+      invariants: [8, 11]
+      relationships: []
+      conformance_dimensions: {}
+
+  - fixture_id: POS-006
+    title: Supersession and binding replacement preserve prior records
+    given:
+      definition: fixture.capability.evaluate@2.0.0
+      prior_definition: fixture.capability.evaluate@1.0.0
+      definition_relationship: SUPERSEDES
+      binding: fixture.binding.evaluate-2
+      prior_binding: fixture.binding.evaluate-1
+      binding_relationship: REPLACES_BINDING
+      prior_records_mutated: false
+    when: materialize replacement history
+    expected:
+      verdict: PASS
+      outcome: replacement-linked-history-preserved
+      reason_codes: [SUPERSESSION_EXPLICIT, PRIOR_RECORD_IMMUTABLE]
+    covers:
+      operations: [Declaration, Resolution, Observation]
+      invariants: [8, 11]
+      relationships: [SUPERSEDES, REPLACES_BINDING]
+      conformance_dimensions: {}
+
+  - fixture_id: POS-007
+    title: Application execution is explicitly scoped as an optional requirement
+    given:
+      project: fixture.project.robot-controller
+      requirement: fixture.requirement.application-execution
+      strength: required
+      scope: fixture.project.robot-controller
+      binding: fixture.binding.application-execution
+    when: compose the project
+    expected:
+      verdict: PASS
+      outcome: application-capability-project-scoped
+      reason_codes: [APPLICATION_SCOPE_EXPLICIT, KERNEL_UNCHANGED]
+    covers:
+      operations: [Declaration, Resolution]
+      invariants: [12]
+      relationships: []
+      conformance_dimensions: {}

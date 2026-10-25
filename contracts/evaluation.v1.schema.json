@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evaluation.v1",
+  "title": "Evaluation Contract Family v1 Candidate",
+  "oneOf": [{"$ref": "#/$defs/profile"}, {"$ref": "#/$defs/definition"}, {"$ref": "#/$defs/request"}, {"$ref": "#/$defs/result"}],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "time": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"},
+    "ref": {
+      "type": "object", "additionalProperties": false, "required": ["semantic_type", "id", "version"],
+      "properties": {"semantic_type": {"$ref": "#/$defs/id"}, "id": {"$ref": "#/$defs/id"}, "version": {"type": "string", "minLength": 1}, "digest": {"$ref": "#/$defs/digest"}, "issuer": {"type": "string", "minLength": 1}}
+    },
+    "immutable_ref": {"allOf": [{"$ref": "#/$defs/ref"}, {"required": ["digest"]}]},
+    "profile_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evaluation_profile"}}}]},
+    "definition_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evaluation_definition"}}}]},
+    "request_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evaluation_request"}}}]},
+    "evidence_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "evidence_record"}}}]},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["scope_type", "scope_id", "profile"],
+      "properties": {"scope_type": {"$ref": "#/$defs/id"}, "scope_id": {"type": "string", "minLength": 1}, "profile": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}}
+    },
+    "availability": {
+      "type": "object", "additionalProperties": false, "required": ["status", "reason"],
+      "properties": {"status": {"enum": ["assessed", "not_assessed", "unavailable", "not_applicable"]}, "reason": {"type": ["string", "null"], "minLength": 1}},
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "assessed"}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "null"}}}},
+        {"if": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "independence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evaluator_must_differ_from_subject_producer", "evaluator_must_differ_from_execution_actor"],
+      "properties": {"evaluator_must_differ_from_subject_producer": {"type": "boolean"}, "evaluator_must_differ_from_execution_actor": {"type": "boolean"}}
+    },
+    "independence_assessment": {
+      "type": "object", "additionalProperties": false,
+      "required": ["overall", "subject_producer_separation", "execution_actor_separation"],
+      "properties": {
+        "overall": {"enum": ["satisfied", "failed", "unknown", "not_applicable"]},
+        "subject_producer_separation": {"enum": ["satisfied", "failed", "unknown", "not_applicable"]},
+        "execution_actor_separation": {"enum": ["satisfied", "failed", "unknown", "not_applicable"]}
+      }
+    },
+    "aggregation": {
+      "type": "object", "additionalProperties": false, "required": ["strategy", "threshold", "custom_method"],
+      "properties": {"strategy": {"enum": ["all_required", "any_required", "weighted_threshold", "custom"]}, "threshold": {"type": ["number", "null"]}, "custom_method": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}},
+      "allOf": [
+        {"if": {"properties": {"strategy": {"const": "weighted_threshold"}}, "required": ["strategy"]}, "then": {"properties": {"threshold": {"type": "number"}}}, "else": {"properties": {"threshold": {"type": "null"}}}},
+        {"if": {"properties": {"strategy": {"const": "custom"}}, "required": ["strategy"]}, "then": {"properties": {"custom_method": {"$ref": "#/$defs/ref"}}}, "else": {"properties": {"custom_method": {"type": "null"}}}}
+      ]
+    },
+    "criterion": {
+      "type": "object", "additionalProperties": false, "required": ["criterion_id", "claim", "required", "weight"],
+      "properties": {"criterion_id": {"$ref": "#/$defs/id"}, "claim": {"$ref": "#/$defs/ref"}, "required": {"type": "boolean"}, "weight": {"type": ["number", "null"], "minimum": 0}}
+    },
+    "finding": {
+      "type": "object", "additionalProperties": false, "required": ["finding_id", "criterion_id", "category", "outcome", "reason_codes", "supports", "informative_detail"],
+      "properties": {
+        "finding_id": {"$ref": "#/$defs/id"}, "criterion_id": {"$ref": "#/$defs/id"}, "category": {"enum": ["criterion", "subject", "evidence", "environment", "evaluator", "contract"]},
+        "outcome": {"enum": ["satisfied", "failed", "partial", "unknown", "not_applicable"]}, "reason_codes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}},
+        "supports": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "informative_detail": {"type": ["string", "null"]}
+      },
+      "allOf": [{"if": {"properties": {"outcome": {"enum": ["satisfied", "failed"]}}, "required": ["outcome"]}, "then": {"properties": {"supports": {"minItems": 1}}}}]
+    },
+    "claim_result": {
+      "type": "object", "additionalProperties": false, "required": ["claim", "outcome", "supports", "limitations", "limitations_availability"],
+      "properties": {"claim": {"$ref": "#/$defs/ref"}, "outcome": {"enum": ["satisfied", "failed", "partial", "unknown", "not_applicable"]}, "supports": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}, "limitations_availability": {"$ref": "#/$defs/availability"}},
+      "allOf": [
+        {"if": {"properties": {"outcome": {"enum": ["satisfied", "failed"]}}, "required": ["outcome"]}, "then": {"properties": {"supports": {"minItems": 1}}}},
+        {"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}}
+      ]
+    },
+    "profile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "evaluation_profile_id", "version", "lifecycle_status", "eligible_evaluators", "independence", "evidence_requirements", "aggregation", "issuer", "authority_binding", "validity_scope", "supersession"],
+      "properties": {
+        "schema": {"const": "evaluation.v1"}, "entity_type": {"const": "evaluation_profile"}, "evaluation_profile_id": {"$ref": "#/$defs/id"}, "version": {"type": "string", "minLength": 1},
+        "lifecycle_status": {"enum": ["experimental", "stable", "deprecated", "withdrawn"]}, "eligible_evaluators": {"type": "array", "items": {"$ref": "#/$defs/ref"}},
+        "independence": {"$ref": "#/$defs/independence"}, "evidence_requirements": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "aggregation": {"$ref": "#/$defs/aggregation"},
+        "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"}, "validity_scope": {"$ref": "#/$defs/scope"}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}
+      }
+    },
+    "definition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "evaluation_definition_id", "version", "lifecycle_status", "profile", "subject_types", "method", "method_configuration", "criteria", "environment_profile", "issuer", "authority_binding", "validity_scope", "supersession"],
+      "properties": {
+        "schema": {"const": "evaluation.v1"}, "entity_type": {"const": "evaluation_definition"}, "evaluation_definition_id": {"$ref": "#/$defs/id"}, "version": {"type": "string", "minLength": 1},
+        "lifecycle_status": {"enum": ["experimental", "stable", "deprecated", "withdrawn"]}, "profile": {"$ref": "#/$defs/profile_ref"}, "subject_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "method": {"$ref": "#/$defs/ref"}, "method_configuration": {"$ref": "#/$defs/immutable_ref"}, "criteria": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/criterion"}},
+        "environment_profile": {"$ref": "#/$defs/ref"}, "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}
+      }
+    },
+    "request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "request_id", "attempt_id", "definition", "profile", "subject", "subject_producer_actor", "execution_actor", "requested_by", "input_refs", "evidence_refs", "requested_environment", "validity_scope", "contract_versions", "requested_at", "lineage", "digest"],
+      "properties": {
+        "schema": {"const": "evaluation.v1"}, "entity_type": {"const": "evaluation_request"}, "request_id": {"$ref": "#/$defs/id"}, "attempt_id": {"$ref": "#/$defs/id"},
+        "definition": {"$ref": "#/$defs/definition_ref"}, "profile": {"$ref": "#/$defs/profile_ref"}, "subject": {"$ref": "#/$defs/immutable_ref"},
+        "subject_producer_actor": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}, "execution_actor": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]},
+        "requested_by": {"$ref": "#/$defs/ref"}, "input_refs": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "evidence_refs": {"type": "array", "items": {"$ref": "#/$defs/evidence_ref"}},
+        "requested_environment": {"$ref": "#/$defs/ref"}, "validity_scope": {"$ref": "#/$defs/scope"}, "contract_versions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}},
+        "requested_at": {"$ref": "#/$defs/time"}, "lineage": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "result_id", "request", "attempt_id", "definition", "profile", "subject", "subject_producer_actor", "execution_actor", "evaluator_actor", "evaluator_binding", "issuer", "authority_binding", "method", "operation_status", "outcome", "failure_reasons", "reason_codes", "independence_assessment", "environment", "findings", "findings_availability", "claims", "claims_availability", "direct_supports", "limitations", "limitations_availability", "uncertainty", "uncertainty_availability", "validity_scope", "started_at", "finished_at", "recorded_at", "lineage", "supersession", "digest"],
+      "properties": {
+        "schema": {"const": "evaluation.v1"}, "entity_type": {"const": "evaluation_result"}, "result_id": {"$ref": "#/$defs/id"}, "request": {"$ref": "#/$defs/request_ref"}, "attempt_id": {"$ref": "#/$defs/id"},
+        "definition": {"$ref": "#/$defs/definition_ref"}, "profile": {"$ref": "#/$defs/profile_ref"}, "subject": {"$ref": "#/$defs/immutable_ref"},
+        "subject_producer_actor": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}, "execution_actor": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]},
+        "evaluator_actor": {"$ref": "#/$defs/ref"}, "evaluator_binding": {"$ref": "#/$defs/immutable_ref"}, "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"}, "method": {"$ref": "#/$defs/ref"},
+        "operation_status": {"enum": ["not_run", "completed", "blocked", "failed", "cancelled", "timeout", "partial", "unknown"]}, "outcome": {"enum": ["satisfied", "failed", "partial", "unknown", "not_applicable"]},
+        "failure_reasons": {"type": "array", "uniqueItems": true, "items": {"enum": ["subject_failure", "criterion_failure", "missing_evidence", "environment_failure", "evaluator_failure", "contract_input_failure", "not_run", "blocked", "cancelled", "timeout", "partial_operation", "unknown_operation"]}},
+        "reason_codes": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "independence_assessment": {"$ref": "#/$defs/independence_assessment"}, "environment": {"$ref": "#/$defs/ref"},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}, "findings_availability": {"$ref": "#/$defs/availability"},
+        "claims": {"type": "array", "items": {"$ref": "#/$defs/claim_result"}}, "claims_availability": {"$ref": "#/$defs/availability"},
+        "direct_supports": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}, "limitations_availability": {"$ref": "#/$defs/availability"},
+        "uncertainty": {"type": "array", "items": {"type": "string", "minLength": 1}}, "uncertainty_availability": {"$ref": "#/$defs/availability"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "started_at": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]}, "finished_at": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]},
+        "recorded_at": {"$ref": "#/$defs/time"}, "lineage": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}, "digest": {"$ref": "#/$defs/digest"}
+      },
+      "allOf": [
+        {"if": {"properties": {"outcome": {"enum": ["satisfied", "failed"]}}, "required": ["outcome"]}, "then": {"properties": {"operation_status": {"const": "completed"}, "direct_supports": {"minItems": 1}}}},
+        {"if": {"properties": {"outcome": {"const": "satisfied"}}, "required": ["outcome"]}, "then": {"properties": {"failure_reasons": {"maxItems": 0}, "independence_assessment": {"properties": {"overall": {"enum": ["satisfied", "not_applicable"]}}}}}},
+        {"if": {"properties": {"outcome": {"const": "failed"}}, "required": ["outcome"]}, "then": {"properties": {"failure_reasons": {"minItems": 1, "items": {"enum": ["subject_failure", "criterion_failure"]}}, "reason_codes": {"minItems": 1}}}},
+        {"if": {"properties": {"operation_status": {"enum": ["not_run", "blocked", "failed", "cancelled", "timeout", "unknown"]}}, "required": ["operation_status"]}, "then": {"properties": {"outcome": {"const": "unknown"}, "reason_codes": {"minItems": 1}}}},
+        {"if": {"properties": {"operation_status": {"const": "not_run"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "not_run"}}}}},
+        {"if": {"properties": {"operation_status": {"const": "blocked"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "blocked"}}}}},
+        {"if": {"properties": {"operation_status": {"const": "failed"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"enum": ["evaluator_failure", "contract_input_failure"]}}}}},
+        {"if": {"properties": {"operation_status": {"const": "cancelled"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "cancelled"}}}}},
+        {"if": {"properties": {"operation_status": {"const": "timeout"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "timeout"}}}}},
+        {"if": {"properties": {"operation_status": {"const": "partial"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "partial_operation"}}, "outcome": {"enum": ["partial", "unknown"]}, "reason_codes": {"minItems": 1}}}},
+        {"if": {"properties": {"operation_status": {"const": "unknown"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_reasons": {"contains": {"const": "unknown_operation"}}}}},
+        {"if": {"properties": {"operation_status": {"const": "completed"}}, "required": ["operation_status"]}, "then": {"properties": {"started_at": {"$ref": "#/$defs/time"}, "finished_at": {"$ref": "#/$defs/time"}}}},
+        {"if": {"properties": {"operation_status": {"enum": ["not_run", "blocked"]}}, "required": ["operation_status"]}, "then": {"properties": {"started_at": {"type": "null"}, "finished_at": {"type": "null"}}}},
+        {"if": {"properties": {"findings_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["findings_availability"]}, "then": {"properties": {"findings": {"maxItems": 0}}}},
+        {"if": {"properties": {"claims_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["claims_availability"]}, "then": {"properties": {"claims": {"maxItems": 0}}}},
+        {"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}},
+        {"if": {"properties": {"uncertainty_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["uncertainty_availability"]}, "then": {"properties": {"uncertainty": {"maxItems": 0}}}}
+      ]
+    }
+  }
+}

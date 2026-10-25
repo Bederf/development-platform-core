@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "forge-m1-live-provider-authorization-request.v2",
+  "title": "Forge M1 Live Provider Authorization Request v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "request_id", "decision", "subject", "provider", "references", "scope", "execution_package", "exclusions", "required_evidence", "authorization_boundary", "digest"],
+  "properties": {
+    "schema": {"const": "forge-m1-live-provider-authorization-request.v2"},
+    "request_id": {"const": "forge-m1-live-provider-authorization-request-v2"},
+    "decision": {"enum": ["pending", "approved", "rejected", "revoked"]},
+    "subject": {"type": "object", "additionalProperties": false, "required": ["phase_id", "plan_revision"], "properties": {"phase_id": {"const": "P035-live"}, "plan_revision": {"const": "1.2.0"}}},
+    "provider": {"type": "object", "additionalProperties": false, "required": ["provider_id", "version", "release_commit", "manifest_digest"], "properties": {"provider_id": {"const": "forge-m1-cli"}, "version": {"const": "1.1.0"}, "release_commit": {"type": "string", "const": "0e254d6224501594a95c6f68c324a8be74776b21"}, "manifest_digest": {"const": "sha256:819e4d1b867072d665bdc6123ad41694b187ad7734bf423af000582aa60621a6"}}},
+    "references": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["kind", "path", "digest"], "properties": {"kind": {"type": "string", "minLength": 1}, "path": {"type": "string", "minLength": 1}, "digest": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}}}},
+    "scope": {"type": "object", "additionalProperties": false, "required": ["mode", "attempt_limit", "timeout_seconds", "retry_policy", "isolation"], "properties": {"mode": {"const": "live-provider-synthetic-fixture-only"}, "attempt_limit": {"const": 1}, "timeout_seconds": {"const": 30}, "retry_policy": {"const": "no-retry"}, "isolation": {"type": "object", "additionalProperties": false, "required": ["mechanism", "argv_constraints", "network_disabled", "provider_mount", "fixture_mount"], "properties": {"mechanism": {"const": "bubblewrap"}, "argv_constraints": {"type": "array", "minItems": 4, "items": {"type": "string"}}, "network_disabled": {"const": true}, "provider_mount": {"const": "read-only:/provider"}, "fixture_mount": {"const": "read-write:/workspace"}}}}},
+    "exclusions": {"type": "array", "minItems": 10, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "required_evidence": {"type": "array", "minItems": 7, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "execution_package": {"type": "object", "additionalProperties": false, "required": ["attempt_id", "attempt_limit", "timeout_seconds", "retry_policy", "fixture_manifest_ref", "input_manifest_ref", "observation_schema_ref", "preflight_ref", "preapproval_status"], "properties": {"attempt_id": {"type": "string", "pattern": "^p035-live-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"}, "attempt_limit": {"const": 1}, "timeout_seconds": {"const": 30}, "retry_policy": {"const": "no-retry"}, "fixture_manifest_ref": {"$ref": "#/$defs/ref"}, "input_manifest_ref": {"$ref": "#/$defs/ref"}, "observation_schema_ref": {"$ref": "#/$defs/ref"}, "preflight_ref": {"$ref": "#/$defs/ref"}, "preapproval_status": {"const": "READY"}}},
+    "authorization_boundary": {"type": "object", "additionalProperties": false, "required": ["live_execution_authorized", "global_forge_enabled", "production_authority_granted"], "properties": {"live_execution_authorized": {"type": "boolean"}, "global_forge_enabled": {"const": false}, "production_authority_granted": {"const": false}}},
+    "digest": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}
+  },
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": {"type": "string", "minLength": 1},
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}
+      }
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"decision": {"const": "approved"}}}, "then": {"properties": {"authorization_boundary": {"properties": {"live_execution_authorized": {"const": true}}}}}, "else": {"properties": {"authorization_boundary": {"properties": {"live_execution_authorized": {"const": false}}}}}}
+  ]
+}

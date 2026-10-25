@@ -1,0 +1,15 @@
+{
+  "schema": "capability-definition.v1", "entity_type": "capability_definition",
+  "capability_id": "current-library-documentation", "version": "1.0.0",
+  "lifecycle_status": "stable", "classification": "optional",
+  "semantic_description": "Retrieve authoritative, version-aware documentation for external libraries and frameworks.",
+  "responsibilities": ["Identify the requested library and version.", "Return relevant documentation for implementation decisions."],
+  "non_responsibilities": ["Replacing repository-local authority.", "Guaranteeing that an API is present in the project's installed dependency set.", "Installing dependencies implicitly."],
+  "semantic_operations": ["Declaration", "Resolution", "Observation"],
+  "input_contracts": [], "output_contracts": [], "relationships": [], "profiles": [],
+  "policy_requirements": [], "constraint_requirements": [], "conformance_requirements": ["structural", "behavioral"],
+  "compatibility_policy": {"semantic_type": "compatibility_policy", "id": "current-library-documentation-compatibility", "version": "1.0.0"},
+  "issuer": "development-platform-core", "authority_binding": null,
+  "validity_scope": {"scope_type": "platform", "scope_id": "development-platform-core"}, "supersession": null,
+  "informative": {"summary": "Provider-neutral current external documentation lookup."}
+}

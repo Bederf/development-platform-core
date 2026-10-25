@@ -1,0 +1,19 @@
+{
+  "fixture_kind": "test-only-gsd-execution-control-p0-plan",
+  "authoritative_phase": {
+    "phase_id": "P041",
+    "specification_id": "gsd-master-3.4.0-execution-control-p0-baseline",
+    "specification_version": "1.0.0",
+    "specification_hash": "sha256:b22e9bf6802614e5ededf77c4ba560254a25f5ed8495cfb442f33dc6511f82c3"
+  },
+  "skill_identity": {
+    "skill_id": "gsd:master",
+    "skill_version": "3.4.0-preview.1",
+    "skill_hash": "fixture-only-not-a-release-digest"
+  },
+  "tasks": [
+    {"task_id": "P041-T001", "depends_on": [], "requirement_refs": ["P041-R001"]},
+    {"task_id": "P041-T002", "depends_on": ["P041-T001"], "requirement_refs": ["P041-R002"]},
+    {"task_id": "P041-T003", "depends_on": ["P041-T001", "P041-T002"], "requirement_refs": ["P041-R003", "P041-R004"]}
+  ]
+}

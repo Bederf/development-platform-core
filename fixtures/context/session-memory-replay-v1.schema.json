@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session-memory-replay.v1",
+  "title": "Session Memory Replay Fixture v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "records"],
+  "properties": {
+    "schema": {"const": "session-memory-replay.v1"},
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["memory_id", "project_id", "session_id", "execution_id", "lineage_id", "source_ref", "source_digest", "content", "authority_class", "trust_class", "relevance"],
+        "properties": {
+          "memory_id": {"type": "string", "minLength": 1},
+          "project_id": {"type": "string", "minLength": 1},
+          "session_id": {"type": "string", "minLength": 1},
+          "execution_id": {"type": "string", "minLength": 1},
+          "lineage_id": {"type": "string", "minLength": 1},
+          "source_ref": {"type": "string", "minLength": 1},
+          "source_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "content": {"type": "string", "minLength": 1},
+          "authority_class": {"enum": ["informational", "authoritative"]},
+          "trust_class": {"enum": ["observed", "verified"]},
+          "relevance": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  }
+}

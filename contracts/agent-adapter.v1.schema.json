@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-adapter.v1",
+  "title": "AgentAdapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "agent", "request_id", "startup_context", "mode"],
+  "properties": {
+    "schema": {"const": "agent-adapter.v1"},
+    "agent": {"enum": ["claude", "codex", "opencode"]},
+    "request_id": {"type": "string", "minLength": 1},
+    "startup_context": {"$ref": "agent-startup-context.v1.schema.json"},
+    "mode": {"enum": ["interactive", "non_interactive", "read_only"]},
+    "task_manifest": {"type": ["string", "null"]}
+  }
+}

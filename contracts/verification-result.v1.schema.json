@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification-result.v1",
+  "title": "VerificationResult v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "request_id", "status", "checks", "evidence"],
+  "properties": {
+    "schema": {"const": "verification-result.v1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["PASSED", "FAILED", "INCOMPLETE", "NOT_RUN"]},
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check_id", "status"],
+        "properties": {
+          "check_id": {"type": "string", "minLength": 1},
+          "status": {"enum": ["PASSED", "FAILED", "SKIPPED"]},
+          "command": {"type": ["string", "null"]},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}

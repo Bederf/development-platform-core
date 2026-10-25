@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "development-quality-hooks.v1",
+  "title": "Generated project quality hook configuration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "ai_review", "transport", "infisical_project_id", "infisical_env", "infisical_path"],
+  "properties": {
+    "schema": {"const": "development-quality-hooks.v1"},
+    "ai_review": {"type": "boolean"},
+    "transport": {"const": "direct"},
+    "infisical_project_id": {"type": "string"},
+    "infisical_env": {"type": "string"},
+    "infisical_path": {"type": "string"},
+    "review_command": {"type": "string", "minLength": 1},
+    "evidence_root": {"type": "string", "minLength": 1}
+  }
+}

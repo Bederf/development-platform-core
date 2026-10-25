@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "capability-selection.v1",
+  "title": "Development Capability Selection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "capabilities"],
+  "properties": {
+    "schema": {"const": "development-capability-selection.v1"},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+    "capabilities": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9][a-z0-9._-]{0,63}$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "implementation", "version"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "implementation": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+            "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"},
+            "profiles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "version"],
+                "properties": {
+                  "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+                  "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"}
+                }
+              }
+            },
+            "configuration": {"type": "object"}
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

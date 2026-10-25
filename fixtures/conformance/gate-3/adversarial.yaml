@@ -1,0 +1,255 @@
+fixture_format: pre-schema-semantic-fixture.v1
+category: adversarial
+fixtures:
+  - fixture_id: ADV-001
+    title: Required dependency cycle
+    given:
+      relationships:
+        - {source: fixture.capability.a, type: REQUIRES, target: fixture.capability.b}
+        - {source: fixture.capability.b, type: REQUIRES, target: fixture.capability.a}
+    when: resolve capability dependencies
+    expected:
+      verdict: UNRESOLVED
+      outcome: dependency-cycle
+      reason_codes: [REQUIRES_CYCLE]
+    covers:
+      operations: [Resolution]
+      invariants: [5, 6]
+      relationships: [REQUIRES]
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-002
+    title: Required and prohibited requirements conflict
+    given:
+      requirements:
+        - {id: fixture.req.required, capability: fixture.capability.storage, strength: required, authority: fixture.org}
+        - {id: fixture.req.prohibited, capability: fixture.capability.storage, strength: prohibited, authority: fixture.org}
+      relationship: {source: fixture.req.required, type: CONFLICTS_WITH, target: fixture.req.prohibited}
+    when: reconcile equally authoritative requirements
+    expected:
+      verdict: UNRESOLVED
+      outcome: hard-conflict
+      reason_codes: [CONFLICTS_WITH, EQUAL_AUTHORITY_CONFLICT]
+    covers:
+      operations: [Declaration, Resolution]
+      invariants: [6]
+      relationships: [CONFLICTS_WITH]
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-003
+    title: Fake implementation self-certifies conformance
+    given:
+      implementation: fixture.impl.self-certified
+      relationship: DECLARES_PROVIDES
+      claimed_relationship: CONFORMS_TO
+      external_evaluator: null
+      evidence: []
+    when: create a satisfied conformance claim
+    expected:
+      verdict: REJECT
+      outcome: self-certification-invalid
+      reason_codes: [DECLARATION_NOT_CONFORMANCE, EVIDENCE_REQUIRED]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: [2, 10]
+      relationships: [DECLARES_PROVIDES, CONFORMS_TO]
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-004
+    title: Forged evidence reference supports conformance
+    given:
+      claim: fixture.claim.forged
+      evidence_reference: fixture.evidence.unknown
+      evidence_issuer: fixture.actor.unrecognized
+      digest_matches: false
+    when: admit the evidence and bind the implementation
+    expected:
+      verdict: DENY
+      outcome: evidence-invalid
+      reason_codes: [EVIDENCE_ISSUER_UNRECOGNIZED, DIGEST_MISMATCH, BINDING_BLOCKED]
+    covers:
+      operations: [Evaluation, Resolution]
+      invariants: [4, 5, 10]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions: {structural: failed, semantic: failed}
+
+  - fixture_id: ADV-005
+    title: Operational evidence expired after binding selection
+    given:
+      selection_result: fixture.selection.impl-alpha
+      operational_claim: {outcome: satisfied, valid_until: 2026-08-24T00:00:00Z}
+      evaluation_time: 2026-08-25T00:00:00Z
+    when: activate a new capability binding
+    expected:
+      verdict: REVIEW_REQUIRED
+      outcome: operational-conformance-expired
+      reason_codes: [EVIDENCE_EXPIRED, SELECTION_NOT_BINDING]
+    covers:
+      operations: [Resolution, Evaluation]
+      invariants: [4, 5, 10]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions: {operational: expired}
+
+  - fixture_id: ADV-006
+    title: Structurally valid but semantically incompatible contract version
+    given:
+      implementation_supports: fixture.contract.context@1.x
+      requirement_needs: fixture.contract.context@2.0.0
+      structural_shape_matches: true
+      semantic_compatibility: incompatible
+    when: select and bind the implementation
+    expected:
+      verdict: REJECT
+      outcome: semantic-version-incompatible
+      reason_codes: [SEMANTIC_INCOMPATIBILITY, STRUCTURE_NOT_SUFFICIENT]
+    covers:
+      operations: [Evaluation, Resolution]
+      invariants: [7]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions: {structural: satisfied, semantic: failed}
+
+  - fixture_id: ADV-007
+    title: Profile extension weakens a base guarantee
+    given:
+      source: fixture.capability.context-unbounded@1.0.0
+      target: fixture.capability.context@1.0.0
+      relationship: EXTENDS
+      removed_constraint: maximum-context-size
+    when: admit the profile as compatible
+    expected:
+      verdict: REJECT
+      outcome: breaking-extension
+      reason_codes: [BASE_GUARANTEE_WEAKENED]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: [7]
+      relationships: [EXTENDS]
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-008
+    title: Invalid relationship source and target types
+    given:
+      source_type: evidence-record
+      relationship: REQUIRES
+      target_type: capability-binding
+    when: admit the capability relationship
+    expected:
+      verdict: REJECT
+      outcome: relationship-type-invalid
+      reason_codes: [INVALID_RELATIONSHIP_SOURCE, INVALID_RELATIONSHIP_TARGET]
+    covers:
+      operations: [Declaration, Evaluation]
+      invariants: [10]
+      relationships: [REQUIRES]
+      conformance_dimensions: {structural: failed, semantic: failed}
+
+  - fixture_id: ADV-009
+    title: Soft preference attempts to override hard constraint
+    given:
+      hard_constraint: {name: network-egress, value: prohibited}
+      preferred_implementation: {id: fixture.impl.cloud-alpha, requires_network_egress: true, weight: 100}
+    when: rank and select candidates
+    expected:
+      verdict: DENY
+      outcome: hard-constraint-unsatisfied
+      reason_codes: [SOFT_PREFERENCE_CANNOT_OVERRIDE_CONSTRAINT]
+    covers:
+      operations: [Resolution]
+      invariants: [6, 9]
+      relationships: []
+      conformance_dimensions: {operational: failed}
+
+  - fixture_id: ADV-010
+    title: Normalizer fabricates missing provenance
+    given:
+      source_record: {id: fixture.legacy.record, provenance: null}
+      normalized_record: {id: fixture.artifact.normalized, provenance: inferred-system}
+    when: claim complete attributable lineage
+    expected:
+      verdict: REJECT
+      outcome: provenance-fabricated
+      reason_codes: [MISSING_MUST_REMAIN_MISSING, LINEAGE_INVALID]
+    covers:
+      operations: [Observation, Resolution]
+      invariants: [11]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-011
+    title: Superseded definition selected without governed exception
+    given:
+      definition: fixture.capability.evaluate@1.0.0
+      lifecycle_status: superseded
+      successor: fixture.capability.evaluate@2.0.0
+      relationship: SUPERSEDES
+      exception_policy: null
+    when: create a new selection
+    expected:
+      verdict: REVIEW_REQUIRED
+      outcome: superseded-definition-ineligible
+      reason_codes: [SUPERSEDED_WITHOUT_EXCEPTION]
+    covers:
+      operations: [Resolution]
+      invariants: [5, 8]
+      relationships: [SUPERSEDES]
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: ADV-012
+    title: Replacement binding rewrites prior binding history
+    given:
+      new_binding: fixture.binding.context-2
+      old_binding: fixture.binding.context-1
+      relationship: REPLACES_BINDING
+      old_record_mutated: true
+    when: record the replacement
+    expected:
+      verdict: REJECT
+      outcome: historical-integrity-violated
+      reason_codes: [PRIOR_RECORD_MUTATED, REPLACEMENT_LINEAGE_INVALID]
+    covers:
+      operations: [Resolution, Observation]
+      invariants: [8, 11]
+      relationships: [REPLACES_BINDING]
+      conformance_dimensions: {behavioral: failed}
+
+  - fixture_id: ADV-013
+    title: Time-bound conformance claim is evaluated after expiry
+    given:
+      claim: fixture.claim.operational-old
+      original_outcome: satisfied
+      valid_until: 2026-08-24T00:00:00Z
+      evaluation_time: 2026-08-25T00:00:00Z
+    when: evaluate current operational conformance
+    expected:
+      verdict: EXPIRED
+      outcome: claim-no-longer-current
+      reason_codes: [VALIDITY_WINDOW_ENDED, EXPIRED_NOT_SATISFIED]
+    covers:
+      operations: [Evaluation]
+      invariants: [5, 10]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions: {operational: expired}
+
+  - fixture_id: ADV-014
+    title: Explicit policy permits only bounded conditional review
+    given:
+      structural_claim: satisfied
+      semantic_claim: satisfied
+      behavioral_claim: satisfied
+      operational_claim: unknown
+      policy: fixture.policy.allow-bounded-review
+      requested_binding_state: active
+    when: resolve binding eligibility
+    expected:
+      verdict: CONDITIONAL
+      outcome: review-only-not-fully-conformant
+      reason_codes: [OPERATIONAL_UNKNOWN, POLICY_CONDITIONAL, ACTIVE_BINDING_BLOCKED]
+    covers:
+      operations: [Evaluation, Resolution]
+      invariants: [4, 5, 10]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions:
+        structural: satisfied
+        semantic: satisfied
+        behavioral: satisfied
+        operational: unknown

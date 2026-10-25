@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Reusable Core pre-commit gate for consumer repositories.
+# Consumers retain their own pre-commit configuration and domain checks; this
+# command supplies the provider-neutral Core deterministic quality/security gate. AI review is push-only.
+
+set -euo pipefail
+
+CORE_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+SCOPE="${1:-staged}"
+
+exec "$CORE_ROOT/.githooks/review-gate.sh" "$SCOPE"

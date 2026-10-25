@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-operating-contract.v1",
+  "title": "Agent Operating Contract v1",
+  "description": "Framework-neutral operational contract for an autonomous agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "contract_id", "version", "identity", "intent", "authority",
+    "policies", "evidence_requirements", "quality_thresholds", "success_criteria",
+    "interfaces", "behavior_profile"
+  ],
+  "properties": {
+    "schema": {"const": "agent-operating-contract.v1"},
+    "contract_id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "name"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string"}
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["business", "operational", "system"],
+      "properties": {
+        "business": {"type": "string", "minLength": 1},
+        "operational": {"type": "string", "minLength": 1},
+        "system": {"type": "string", "minLength": 1}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read", "recommend", "execute", "approval_required"],
+      "properties": {
+        "read": {"type": "array", "items": {"type": "string"}},
+        "recommend": {"type": "array", "items": {"type": "string"}},
+        "execute": {"type": "array", "items": {"type": "string"}},
+        "approval_required": {"type": "boolean"}
+      }
+    },
+    "policies": {"type": "array", "items": {"type": "string"}},
+    "evidence_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "minimum_sources", "freshness"],
+      "properties": {
+        "sources": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "minimum_sources": {"type": "integer", "minimum": 1},
+        "freshness": {"type": "string", "minLength": 1}
+      }
+    },
+    "quality_thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_confidence", "minimum_evidence_quality"],
+      "properties": {
+        "minimum_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "minimum_evidence_quality": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "success_criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "interfaces": {"type": "array", "items": {"type": "string"}},
+    "behavior_profile": {"$ref": "behavior-profile.v1.schema.json"},
+    "learning_rules": {"type": "array", "items": {"type": "string"}}
+  }
+}

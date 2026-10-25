@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gsd-learning.v1",
+  "title": "GSD Governed Learning Contract Family v1",
+  "description": "Evidence-backed observations, patterns, improvement proposals, governance decisions, and adoption evidence for GSD process improvement.",
+  "unevaluatedProperties": false,
+  "oneOf": [
+    {"$ref": "#/$defs/observation"}, {"$ref": "#/$defs/pattern"},
+    {"$ref": "#/$defs/procedural_candidate"}, {"$ref": "#/$defs/process_candidate"},
+    {"$ref": "#/$defs/governance_decision"}, {"$ref": "#/$defs/adoption_evidence"}
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "time": {"type": "string", "format": "date-time"},
+    "ref": {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {"id": {"$ref": "#/$defs/id"}, "version": {"$ref": "#/$defs/version"}}},
+    "refs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}},
+    "base": {"type": "object", "required": ["schema", "id", "version", "statement", "evidence", "confidence", "observed_at"], "properties": {"schema": {"const": "gsd-learning.v1"}, "id": {"$ref": "#/$defs/id"}, "version": {"$ref": "#/$defs/version"}, "statement": {"type": "string", "minLength": 1}, "evidence": {"$ref": "#/$defs/refs"}, "confidence": {"enum": ["very_low", "low", "medium", "high", "very_high"]}, "observed_at": {"$ref": "#/$defs/time"}}},
+    "observation": {"allOf": [{"$ref": "#/$defs/base"}, {"type": "object", "required": ["entity_type", "session_refs"], "properties": {"entity_type": {"const": "observation"}, "session_refs": {"$ref": "#/$defs/refs"}}}]},
+    "pattern": {"allOf": [{"$ref": "#/$defs/base"}, {"type": "object", "required": ["entity_type", "observation_refs", "scope", "strength"], "properties": {"entity_type": {"const": "pattern"}, "observation_refs": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/ref"}}, "scope": {"type": "string", "minLength": 1}, "strength": {"$ref": "#/$defs/strength"}}}]},
+    "strength": {"type": "object", "additionalProperties": false, "required": ["evidence_level", "independent_session_count", "reproducible", "candidate_eligible", "independence_proof"], "properties": {"evidence_level": {"type": "integer", "minimum": 1, "maximum": 5}, "independent_session_count": {"type": "integer", "minimum": 1}, "reproducible": {"type": "boolean"}, "candidate_eligible": {"type": "boolean"}, "independence_proof": {"$ref": "#/$defs/independence_proof"}}},
+    "independence_proof": {"type": "object", "additionalProperties": false, "required": ["session_record_refs", "execution_ids", "lineage_checked", "attestation_ref"], "properties": {"session_record_refs": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/ref"}}, "execution_ids": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}, "lineage_checked": {"const": true}, "attestation_ref": {"$ref": "#/$defs/ref"}}},
+    "candidate_base": {"type": "object", "required": ["schema", "id", "version", "entity_type", "observation_refs", "pattern_refs", "proposed_change", "provenance", "status", "created_at"], "properties": {"schema": {"const": "gsd-learning.v1"}, "id": {"$ref": "#/$defs/id"}, "version": {"$ref": "#/$defs/version"}, "entity_type": {"enum": ["procedural_candidate", "process_candidate"]}, "observation_refs": {"$ref": "#/$defs/refs"}, "pattern_refs": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "proposed_change": {"type": "string", "minLength": 1}, "provenance": {"$ref": "#/$defs/refs"}, "status": {"const": "proposed"}, "created_at": {"$ref": "#/$defs/time"}}},
+    "procedural_candidate": {"allOf": [{"$ref": "#/$defs/candidate_base"}, {"type": "object", "properties": {"entity_type": {"const": "procedural_candidate"}, "affected_capability": {"$ref": "#/$defs/ref"}}, "required": ["affected_capability"]}]},
+    "process_candidate": {"allOf": [{"$ref": "#/$defs/candidate_base"}, {"type": "object", "properties": {"entity_type": {"const": "process_candidate"}, "affected_graph": {"$ref": "#/$defs/ref"}, "affected_profile": {"enum": ["small", "medium", "large", null]}}, "required": ["affected_graph"]}]},
+    "governance_decision": {"type": "object", "additionalProperties": false, "required": ["schema", "id", "version", "entity_type", "candidate", "decision", "authority", "rationale", "decided_at"], "properties": {"schema": {"const": "gsd-learning.v1"}, "id": {"$ref": "#/$defs/id"}, "version": {"$ref": "#/$defs/version"}, "entity_type": {"const": "governance_decision"}, "candidate": {"$ref": "#/$defs/ref"}, "decision": {"enum": ["approve", "reject", "defer"]}, "authority": {"$ref": "#/$defs/ref"}, "rationale": {"type": "string", "minLength": 1}, "decided_at": {"$ref": "#/$defs/time"}}},
+    "adoption_evidence": {"type": "object", "additionalProperties": false, "required": ["schema", "id", "version", "entity_type", "candidate", "decision", "compatibility_check", "adopted_version", "evidence", "recorded_at"], "properties": {"schema": {"const": "gsd-learning.v1"}, "id": {"$ref": "#/$defs/id"}, "version": {"$ref": "#/$defs/version"}, "entity_type": {"const": "adoption_evidence"}, "candidate": {"$ref": "#/$defs/ref"}, "decision": {"$ref": "#/$defs/ref"}, "compatibility_check": {"$ref": "#/$defs/ref"}, "adopted_version": {"$ref": "#/$defs/version"}, "evidence": {"$ref": "#/$defs/refs"}, "recorded_at": {"$ref": "#/$defs/time"}}}
+  }
+}

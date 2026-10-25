@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project-definition.v1",
+  "title": "Canonical Project Definition",
+  "description": "Product-neutral, canonical project definition. This document is the authoritative machine-readable project definition; readable documentation is derived from it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "definition_id",
+    "version",
+    "status",
+    "project",
+    "intent",
+    "boundaries",
+    "architecture",
+    "security",
+    "lifecycle",
+    "success_criteria",
+    "governance_ref",
+    "provenance",
+    "digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "project-definition.v1"
+    },
+    "definition_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,63}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": ["proposed", "approved", "superseded", "revoked"]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "name", "repository_root"],
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{1,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "repository_root": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "objectives"],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objectives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "out_of_scope"],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "out_of_scope": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["principles", "constraints"],
+      "properties": {
+        "principles": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "constraints": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["principles", "constraints"],
+      "properties": {
+        "principles": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "constraints": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage_id", "name", "required"],
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,63}$"
+          },
+          "name": {"type": "string", "minLength": 1},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion_id", "statement", "verification"],
+        "properties": {
+          "criterion_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,63}$"
+          },
+          "statement": {"type": "string", "minLength": 1},
+          "verification": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "governance_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "context_id", "version", "digest", "locator"],
+      "properties": {
+        "schema": {"const": "project-governance.v1"},
+        "context_id": {"type": "string", "minLength": 1},
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable URI or repository-relative locator used to resolve the governance record before digest verification."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at", "created_by", "source_refs"],
+      "properties": {
+        "created_at": {"type": "string", "format": "date-time"},
+        "created_by": {"type": "string", "minLength": 1},
+        "source_refs": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "supersedes_ref": {"type": ["string", "null"]}
+      }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}

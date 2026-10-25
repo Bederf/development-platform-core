@@ -1,0 +1,44 @@
+{
+  "schema": "capability-definition.v1",
+  "entity_type": "capability_definition",
+  "capability_id": "security-audit",
+  "version": "1.0.2",
+  "lifecycle_status": "experimental",
+  "classification": "platform_baseline",
+  "semantic_description": "Run the pinned Cloudflare security-audit methodology as an explicit, source-only Glasswing/Core build and release assurance capability.",
+  "responsibilities": [
+    "Validate pinned methodology provenance and audit inputs.",
+    "Validate the seven required source-only audit artifacts.",
+    "Run the pinned coverage and findings validators.",
+    "Fail closed on incomplete evidence or forbidden execution boundaries."
+  ],
+  "non_responsibilities": [
+    "Running from the pre-commit hook.",
+    "Providing a second orchestrator.",
+    "Enabling Forge, runtime, consumers, OpenSandbox or production paths.",
+    "Executing target-controlled code or authorizing remediation or deployment.",
+    "Treating findings as production authority."
+  ],
+  "semantic_operations": ["Declaration", "Evaluation"],
+  "input_contracts": [
+    {"semantic_type": "security-audit-build-run", "id": "security-audit-build-run.v1", "version": "1.0.0"}
+  ],
+  "output_contracts": [
+    {"semantic_type": "security-audit-build-evidence", "id": "security-audit-build-run.v1", "version": "1.0.0"}
+  ],
+  "relationships": [],
+  "profiles": [],
+  "policy_requirements": [],
+  "constraint_requirements": [],
+  "conformance_requirements": ["structural", "semantic", "behavioral"],
+  "compatibility_policy": {"semantic_type": "compatibility-policy", "id": "security-audit-compatibility", "version": "1.0.0"},
+  "issuer": "development-platform-core",
+  "authority_binding": null,
+  "validity_scope": {"scope_type": "platform", "scope_id": "development-platform-core"},
+  "supersession": null,
+  "informative": {
+    "display_label": "Build-Time Security Audit",
+    "summary": "Explicit build/release assurance over an immutable source snapshot; never a pre-commit or production control.",
+    "documentation_refs": ["00-GSD-Phases/Phase-036-Build-Time-Security-Audit-Capability.md", "docs/specifications/SECURITY-AUDIT-PILOT-v1.md"]
+  }
+}

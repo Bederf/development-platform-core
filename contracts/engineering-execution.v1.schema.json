@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-execution.v1",
+  "title": "Engineering Execution Contract Family v1 Candidate",
+  "oneOf": [{"$ref": "#/$defs/proposal"}, {"$ref": "#/$defs/authorized_request"}, {"$ref": "#/$defs/result"}],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "time": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"},
+    "ref": {
+      "type": "object", "additionalProperties": false, "required": ["semantic_type", "id", "version"],
+      "properties": {"semantic_type": {"$ref": "#/$defs/id"}, "id": {"$ref": "#/$defs/id"}, "version": {"type": "string", "minLength": 1}, "digest": {"$ref": "#/$defs/digest"}, "issuer": {"type": "string", "minLength": 1}}
+    },
+    "immutable_ref": {"allOf": [{"$ref": "#/$defs/ref"}, {"required": ["digest"]}]},
+    "proposal_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "execution_proposal"}}}]},
+    "decision_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "policy_decision"}}}]},
+    "request_ref": {"allOf": [{"$ref": "#/$defs/immutable_ref"}, {"properties": {"semantic_type": {"const": "authorized_execution_request"}}}]},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["scope_type", "scope_id", "profile"],
+      "properties": {"scope_type": {"$ref": "#/$defs/id"}, "scope_id": {"type": "string", "minLength": 1}, "profile": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}}
+    },
+    "availability": {
+      "type": "object", "additionalProperties": false, "required": ["status", "reason"],
+      "properties": {"status": {"enum": ["assessed", "not_assessed", "unavailable", "not_applicable"]}, "reason": {"type": ["string", "null"], "minLength": 1}},
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "assessed"}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "null"}}}},
+        {"if": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}, "then": {"properties": {"reason": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "constraints": {
+      "type": "object", "additionalProperties": false, "required": ["working_scope", "filesystem_policy", "network_policy", "environment_policy", "timeout_seconds"],
+      "properties": {"working_scope": {"$ref": "#/$defs/scope"}, "filesystem_policy": {"$ref": "#/$defs/immutable_ref"}, "network_policy": {"$ref": "#/$defs/immutable_ref"}, "environment_policy": {"$ref": "#/$defs/immutable_ref"}, "timeout_seconds": {"type": "integer", "minimum": 1}}
+    },
+    "effect": {
+      "type": "object", "additionalProperties": false, "required": ["effect_id", "effect_type", "subject", "status", "reason_codes"],
+      "properties": {"effect_id": {"$ref": "#/$defs/id"}, "effect_type": {"$ref": "#/$defs/id"}, "subject": {"$ref": "#/$defs/immutable_ref"}, "status": {"enum": ["attempted", "completed", "failed", "unknown"]}, "reason_codes": {"type": "array", "items": {"$ref": "#/$defs/id"}}}
+    },
+    "proposal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "proposal_id", "attempt_id", "task_id", "session_id", "actor", "capability_binding", "operation", "arguments_contract", "arguments", "arguments_digest", "target", "baseline", "requested_constraints", "requested_by", "requested_at", "validity_scope", "lineage", "digest"],
+      "properties": {
+        "schema": {"const": "engineering-execution.v1"}, "entity_type": {"const": "execution_proposal"}, "proposal_id": {"$ref": "#/$defs/id"}, "attempt_id": {"$ref": "#/$defs/id"},
+        "task_id": {"$ref": "#/$defs/id"}, "session_id": {"$ref": "#/$defs/id"}, "actor": {"$ref": "#/$defs/ref"}, "capability_binding": {"$ref": "#/$defs/immutable_ref"},
+        "operation": {"$ref": "#/$defs/id"}, "arguments_contract": {"$ref": "#/$defs/ref"}, "arguments": {"type": "object"}, "arguments_digest": {"$ref": "#/$defs/digest"},
+        "target": {"$ref": "#/$defs/immutable_ref"}, "baseline": {"$ref": "#/$defs/immutable_ref"}, "requested_constraints": {"$ref": "#/$defs/constraints"},
+        "requested_by": {"$ref": "#/$defs/ref"}, "requested_at": {"$ref": "#/$defs/time"}, "validity_scope": {"$ref": "#/$defs/scope"},
+        "lineage": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "authorized_request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "execution_request_id", "proposal", "policy_decision", "policy_domain", "policy_action", "authorization_use_id", "authorization_use_index", "attempt_id", "actor", "capability_binding", "operation", "arguments_contract", "arguments", "arguments_digest", "target", "baseline", "enforced_constraints", "executor_binding", "issuer", "authority_binding", "validity_scope", "issued_at", "expires_at", "lineage", "digest"],
+      "properties": {
+        "schema": {"const": "engineering-execution.v1"}, "entity_type": {"const": "authorized_execution_request"}, "execution_request_id": {"$ref": "#/$defs/id"},
+        "proposal": {"$ref": "#/$defs/proposal_ref"}, "policy_decision": {"$ref": "#/$defs/decision_ref"}, "policy_domain": {"const": "execution"}, "policy_action": {"$ref": "#/$defs/id"},
+        "authorization_use_id": {"$ref": "#/$defs/id"}, "authorization_use_index": {"type": "integer", "minimum": 1}, "attempt_id": {"$ref": "#/$defs/id"},
+        "actor": {"$ref": "#/$defs/ref"}, "capability_binding": {"$ref": "#/$defs/immutable_ref"}, "operation": {"$ref": "#/$defs/id"},
+        "arguments_contract": {"$ref": "#/$defs/ref"}, "arguments": {"type": "object"}, "arguments_digest": {"$ref": "#/$defs/digest"},
+        "target": {"$ref": "#/$defs/immutable_ref"}, "baseline": {"$ref": "#/$defs/immutable_ref"}, "enforced_constraints": {"$ref": "#/$defs/constraints"},
+        "executor_binding": {"$ref": "#/$defs/immutable_ref"}, "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "issued_at": {"$ref": "#/$defs/time"}, "expires_at": {"$ref": "#/$defs/time"},
+        "lineage": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/ref"}}, "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entity_type", "execution_id", "execution_request", "proposal", "policy_decision", "policy_domain", "policy_action", "authorization_use_id", "attempt_id", "actor", "executor_binding", "issuer", "authority_binding", "capability_binding", "operation", "target", "baseline", "arguments_digest", "operation_status", "attempted_effects", "completed_effects", "outputs", "artifacts", "observations", "failure_category", "reason_codes", "actual_environment", "enforced_constraints", "started_at", "finished_at", "recorded_at", "validity_scope", "limitations", "limitations_availability", "lineage", "supersession", "digest"],
+      "properties": {
+        "schema": {"const": "engineering-execution.v1"}, "entity_type": {"const": "execution_result"}, "execution_id": {"$ref": "#/$defs/id"},
+        "execution_request": {"$ref": "#/$defs/request_ref"}, "proposal": {"$ref": "#/$defs/proposal_ref"}, "policy_decision": {"$ref": "#/$defs/decision_ref"},
+        "policy_domain": {"const": "execution"}, "policy_action": {"$ref": "#/$defs/id"}, "authorization_use_id": {"$ref": "#/$defs/id"}, "attempt_id": {"$ref": "#/$defs/id"},
+        "actor": {"$ref": "#/$defs/ref"}, "executor_binding": {"$ref": "#/$defs/immutable_ref"}, "issuer": {"type": "string", "minLength": 1}, "authority_binding": {"$ref": "#/$defs/ref"},
+        "capability_binding": {"$ref": "#/$defs/immutable_ref"}, "operation": {"$ref": "#/$defs/id"}, "target": {"$ref": "#/$defs/immutable_ref"}, "baseline": {"$ref": "#/$defs/immutable_ref"},
+        "arguments_digest": {"$ref": "#/$defs/digest"}, "operation_status": {"enum": ["not_run", "completed", "failed", "blocked", "partial", "cancelled", "timeout", "unknown"]},
+        "attempted_effects": {"type": "array", "items": {"$ref": "#/$defs/effect"}}, "completed_effects": {"type": "array", "items": {"$ref": "#/$defs/effect"}},
+        "outputs": {"type": "array", "items": {"$ref": "#/$defs/immutable_ref"}}, "artifacts": {"type": "array", "items": {"$ref": "#/$defs/immutable_ref"}}, "observations": {"type": "array", "items": {"$ref": "#/$defs/ref"}},
+        "failure_category": {"oneOf": [{"enum": ["authorization", "validation", "executor", "environment", "timeout", "cancelled", "partial_effect", "contract_input", "unknown"]}, {"type": "null"}]},
+        "reason_codes": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "actual_environment": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}, "enforced_constraints": {"$ref": "#/$defs/constraints"},
+        "started_at": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]}, "finished_at": {"oneOf": [{"$ref": "#/$defs/time"}, {"type": "null"}]}, "recorded_at": {"$ref": "#/$defs/time"},
+        "validity_scope": {"$ref": "#/$defs/scope"}, "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}, "limitations_availability": {"$ref": "#/$defs/availability"},
+        "lineage": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ref"}}, "supersession": {"oneOf": [{"$ref": "#/$defs/ref"}, {"type": "null"}]}, "digest": {"$ref": "#/$defs/digest"}
+      },
+      "allOf": [
+        {"if": {"properties": {"operation_status": {"const": "completed"}}, "required": ["operation_status"]}, "then": {"properties": {"failure_category": {"type": "null"}, "started_at": {"$ref": "#/$defs/time"}, "finished_at": {"$ref": "#/$defs/time"}}}},
+        {"if": {"properties": {"operation_status": {"enum": ["not_run", "failed", "blocked", "partial", "cancelled", "timeout", "unknown"]}}, "required": ["operation_status"]}, "then": {"properties": {"failure_category": {"not": {"type": "null"}}, "reason_codes": {"minItems": 1}}}},
+        {"if": {"properties": {"operation_status": {"enum": ["not_run", "blocked"]}}, "required": ["operation_status"]}, "then": {"properties": {"started_at": {"type": "null"}, "finished_at": {"type": "null"}, "attempted_effects": {"maxItems": 0}, "completed_effects": {"maxItems": 0}}}},
+        {"if": {"properties": {"limitations_availability": {"properties": {"status": {"enum": ["not_assessed", "unavailable", "not_applicable"]}}, "required": ["status"]}}, "required": ["limitations_availability"]}, "then": {"properties": {"limitations": {"maxItems": 0}}}}
+      ]
+    }
+  }
+}

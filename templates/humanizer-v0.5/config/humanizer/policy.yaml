@@ -1,0 +1,9 @@
+schema: humanizer.project-policy.v1
+humanizer:
+  present: true
+  enabled: false
+  version: "0.5.0"
+  qualification_status: pending
+  forge_required: true
+  human_verification_required: true
+  implementation: project-local

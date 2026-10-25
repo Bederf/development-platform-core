@@ -1,0 +1,13 @@
+{
+  "fixture_kind": "test-only-gsd-execution-control-p0-graph",
+  "graph_revision": "p0-fixture-1",
+  "authority": "fixture-only",
+  "nodes": [
+    {"task_id": "P041-T001", "depends_on": []},
+    {"task_id": "P041-T002", "depends_on": ["P041-T001"]},
+    {"task_id": "P041-T003", "depends_on": ["P041-T001", "P041-T002"]}
+  ],
+  "controller_state_root": ".gsd-control/3.4.0/p0-fixture-1",
+  "legacy_gsd_engine_root": ".gsd-engine",
+  "legacy_records_are_controller_authority": false
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gsd-session-governance.v1",
+  "title": "GSDSessionGovernance v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "session_id", "lifecycle_state", "intent_status", "objective", "profile", "lifecycle_events"],
+  "properties": {
+    "schema": {"const": "gsd-session-governance.v1"},
+    "session_id": {"type": "string", "minLength": 1},
+    "lifecycle_state": {"enum": ["CONTEXT_LOADED", "INTENT_CAPTURED", "PROFILE_ASSESSED", "PLANNED", "EXECUTING", "VERIFYING", "COMPLETED", "BLOCKED"]},
+    "intent_status": {"enum": ["REQUIRED", "CAPTURED"]},
+    "objective": {"type": ["string", "null"]},
+    "profile": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["name", "execution_mode", "source"],
+      "properties": {
+        "name": {"enum": ["small", "medium", "large"]},
+        "execution_mode": {"enum": ["LIGHTWEIGHT", "STANDARD", "FULL"]},
+        "source": {"enum": ["engine", "inline", "operator"]}
+      }
+    },
+    "lifecycle_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "occurred_at"],
+        "properties": {
+          "event": {"enum": ["CONTEXT_LOADED", "INTENT_CAPTURED", "PROFILE_ASSESSED", "PLANNED", "EXECUTING", "VERIFYING", "COMPLETED", "BLOCKED"]},
+          "occurred_at": {"type": "string", "format": "date-time"},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: Ponytail
+  short_description: Build the smallest complete safe solution
+  default_prompt: Apply Ponytail: inspect the existing code, reuse what exists, and implement only what the requirement needs while preserving all safety and quality guards.

@@ -1,0 +1,10 @@
+{
+  "example_id": "repository-architecture",
+  "context": "repository",
+  "operation": "write-file",
+  "target_semantic_type": "repository_path",
+  "arguments": {
+    "path": "bounded/feature.py"
+  },
+  "asserted_use": "Authorize one bounded repository mutation, evaluate its output, and preserve admitted evidence without granting acceptance."
+}

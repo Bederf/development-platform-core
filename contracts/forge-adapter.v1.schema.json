@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "forge-adapter.v1",
+  "title": "ForgeAdapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "operation", "project_id", "request_id"],
+  "properties": {
+    "schema": {"const": "forge-adapter.v1"},
+    "operation": {"enum": ["start", "verify", "finish"]},
+    "project_id": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "session_id": {"type": ["string", "null"]},
+    "verification_request": {"type": ["object", "null"]},
+    "closeout_context": {"type": ["object", "null"]}
+  }
+}

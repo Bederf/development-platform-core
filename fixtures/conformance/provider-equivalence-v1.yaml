@@ -1,0 +1,32 @@
+schema: provider-equivalence-conformance.v1
+description: >-
+  Provider-neutral qualification of equivalent verified state transitions.
+  Providers may express different proposals, but only the runtime and verifier
+  determine the accepted transition.
+capability:
+  id: document.update
+  version: 1.0.0
+  operation: apply
+  target: document://example
+  expected_transition: document://example@revision-2
+providers:
+  - id: provider.alpha
+    proposal: {operation: apply, target: document://example, content: "alpha wording"}
+  - id: provider.beta
+    proposal: {operation: apply, target: document://example, content: "beta wording"}
+cases:
+  - id: equivalent-verified-transition
+    authorization: allow
+    verification: pass
+    expected_state: VERIFIED
+    expected_transition: document://example@revision-2
+  - id: unauthorized-provider-proposal
+    authorization: deny
+    verification: not_run
+    expected_state: UNVERIFIED
+    expected_transition: null
+  - id: unverifiable-provider-result
+    authorization: allow
+    verification: unavailable
+    expected_state: UNVERIFIED
+    expected_transition: null

@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "multi-instance-provider.v1",
+  "title": "MultiInstanceProvider v1",
+  "description": "Provider-neutral topology, membership, health, and credential-rotation boundary for independently isolated service instances. Credentials are represented only by opaque references.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "message_type", "operation", "request_id", "scope_id"],
+  "properties": {
+    "schema": {"const": "multi-instance-provider.v1"},
+    "message_type": {"enum": ["request", "result"]},
+    "operation": {
+      "enum": ["configure_topology", "change_membership", "report_health", "rotate_credential"]
+    },
+    "request_id": {"type": "string", "minLength": 1},
+    "in_reply_to": {"type": "string", "minLength": 1},
+    "scope_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Consumer-owned scope for the topology; the platform assigns no product meaning to it."
+    },
+    "topology": {"$ref": "#/$defs/topology"},
+    "membership_change": {"$ref": "#/$defs/membership_change"},
+    "credential_rotation": {"$ref": "#/$defs/credential_rotation"},
+    "health": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/health_observation"}
+    },
+    "outcome": {"$ref": "#/$defs/outcome"},
+    "transaction": {"$ref": "#/$defs/transaction"},
+    "error": {"$ref": "#/$defs/error"}
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*://[^\\s]+$",
+      "description": "Opaque provider reference. The referenced value is never embedded in this contract."
+    },
+    "topology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "instances"],
+      "properties": {
+        "revision": {"type": "integer", "minimum": 0},
+        "instances": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/instance"}
+        }
+      }
+    },
+    "instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instance_id",
+        "isolation_key",
+        "role",
+        "deployment_mode",
+        "credential_ref",
+        "configuration_ref",
+        "state_ref",
+        "log_ref",
+        "failure_domain",
+        "admission_policy",
+        "authorization_ref",
+        "health_policy"
+      ],
+      "properties": {
+        "instance_id": {"type": "string", "minLength": 1},
+        "isolation_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Consumer-defined isolation partition such as a tenant, environment, or customer."
+        },
+        "role": {"type": "string", "minLength": 1},
+        "deployment_mode": {"enum": ["DEDICATED", "LEGACY_SHARED"]},
+        "credential_ref": {"$ref": "#/$defs/reference"},
+        "configuration_ref": {"$ref": "#/$defs/reference"},
+        "state_ref": {"$ref": "#/$defs/reference"},
+        "log_ref": {"$ref": "#/$defs/reference"},
+        "failure_domain": {"type": "string", "minLength": 1},
+        "display_name": {"type": "string", "minLength": 1},
+        "admission_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "principal_ids"],
+          "properties": {
+            "mode": {"const": "ALLOWLIST"},
+            "principal_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "authorization_ref": {"$ref": "#/$defs/reference"},
+        "health_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["interval_seconds", "probe_ref"],
+          "properties": {
+            "interval_seconds": {"type": "integer", "minimum": 1},
+            "probe_ref": {"$ref": "#/$defs/reference"}
+          }
+        },
+        "metadata": {"type": "object"}
+      }
+    },
+    "membership_change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "principal_id",
+        "isolation_key",
+        "role",
+        "action",
+        "targets",
+        "consistency"
+      ],
+      "properties": {
+        "principal_id": {"type": "string", "minLength": 1},
+        "isolation_key": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "action": {"enum": ["ADD", "REMOVE"]},
+        "targets": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "OUTER_ADMISSION"},
+            {"const": "INNER_AUTHORIZATION"}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "consistency": {"const": "REQUIRED_ATOMIC"},
+        "expected_revision": {"type": "integer", "minimum": 0},
+        "requested_by": {"type": "string", "minLength": 1}
+      }
+    },
+    "credential_rotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instance_id", "current_credential_ref", "replacement_credential_ref"],
+      "properties": {
+        "instance_id": {"type": "string", "minLength": 1},
+        "current_credential_ref": {"$ref": "#/$defs/reference"},
+        "replacement_credential_ref": {"$ref": "#/$defs/reference"},
+        "restart_scope": {"const": "TARGET_INSTANCE_ONLY"}
+      }
+    },
+    "health_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instance_id", "failure_domain", "status", "checked_at"],
+      "properties": {
+        "instance_id": {"type": "string", "minLength": 1},
+        "failure_domain": {"type": "string", "minLength": 1},
+        "status": {"enum": ["HEALTHY", "DEGRADED", "UNHEALTHY", "UNKNOWN"]},
+        "checked_at": {"type": "string", "format": "date-time"},
+        "detail": {"type": "string"},
+        "metadata": {"type": "object"}
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["ACCEPTED", "APPLIED", "NOOP", "REJECTED", "FAILED"]},
+        "revision": {"type": "integer", "minimum": 0},
+        "affected_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/reference"}
+        }
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atomic", "committed", "rolled_back", "outer_admission", "inner_authorization"],
+      "properties": {
+        "atomic": {"const": true},
+        "committed": {"type": "boolean"},
+        "rolled_back": {"type": "boolean"},
+        "outer_admission": {"enum": ["APPLIED", "UNCHANGED", "ROLLED_BACK", "FAILED"]},
+        "inner_authorization": {"enum": ["APPLIED", "UNCHANGED", "ROLLED_BACK", "FAILED"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"committed": {"const": true}}, "required": ["committed"]},
+          "then": {"properties": {"rolled_back": {"const": false}}},
+          "else": {"properties": {"rolled_back": {"const": true}}}
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1},
+        "retryable": {"type": "boolean"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"message_type": {"const": "request"}}, "required": ["message_type"]},
+      "then": {
+        "not": {"anyOf": [{"required": ["in_reply_to"]}, {"required": ["outcome"]}, {"required": ["transaction"]}, {"required": ["error"]}]}
+      },
+      "else": {"required": ["in_reply_to", "outcome"]}
+    },
+    {
+      "if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "configure_topology"}}, "required": ["message_type", "operation"]},
+      "then": {"required": ["topology"]}
+    },
+    {
+      "if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "change_membership"}}, "required": ["message_type", "operation"]},
+      "then": {"required": ["membership_change"]}
+    },
+    {
+      "if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "rotate_credential"}}, "required": ["message_type", "operation"]},
+      "then": {"required": ["credential_rotation"]}
+    },
+    {
+      "if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "change_membership"}}, "required": ["message_type", "operation"]},
+      "then": {"required": ["transaction"]}
+    },
+    {
+      "if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "report_health"}}, "required": ["message_type", "operation"]},
+      "then": {"required": ["health"]}
+    },
+    {
+      "if": {"properties": {"outcome": {"properties": {"status": {"enum": ["REJECTED", "FAILED"]}}, "required": ["status"]}}, "required": ["outcome"]},
+      "then": {"required": ["error"]}
+    }
+  ]
+}

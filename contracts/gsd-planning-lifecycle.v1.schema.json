@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gsd-planning-lifecycle.v1",
+  "title": "GSDPlanningLifecycle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "phase_id", "phase_status", "lifecycle_events"],
+  "properties": {
+    "schema": {"const": "gsd-planning-lifecycle.v1"},
+    "phase_id": {"type": "string", "minLength": 1},
+    "phase_status": {"enum": ["PROPOSED", "AUTHORIZED", "IN_PROGRESS", "VERIFICATION", "COMPLETE", "BLOCKED", "CANCELLED"]},
+    "lifecycle_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "occurred_at"],
+        "properties": {
+          "event": {"enum": ["STARTED", "DISPATCHED", "EXECUTED", "VERIFIED", "GOVERNED", "RECORDED", "COMPLETED", "BLOCKED"]},
+          "occurred_at": {"type": "string", "format": "date-time"},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "gsd-master-release-manifest.v1",
+  "capability_id": "gsd.master",
+  "version": "3.3.4",
+  "bundle_digest": "sha256:5fc09294da0c15eeb9f2f4a45ec1393f2b79131e94b8cf8af361c30c12894f7c",
+  "canonicalization": "for each included file sorted by relative path: '<path>' NUL '<sha256>' LF; digest = SHA-256 over the concatenated UTF-8 bytes. Sorting occurs inside the digest function.",
+  "bundle_files": 21,
+  "source_revision": "574531c378cf1b6733d6358827b7c078fdf691de",
+  "excluded": [
+    {
+      "path": ".serena/.gitignore",
+      "reason": "maintainer-local tooling"
+    },
+    {
+      "path": ".serena/project.yml",
+      "reason": "maintainer-local tooling"
+    },
+    {
+      "path": ".serena/project.local.yml",
+      "reason": "git-ignored local state"
+    }
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "6f0b6ef2ddc87ecc6157d3104166f96eaf729bf936b79f8eb4d5ae9dc4b48071",
+      "bytes": 267
+    },
+    {
+      "path": "ACKNOWLEDGMENTS.md",
+      "sha256": "1de0253cee653812ceb6441dede4645f63b3142eef52a25ac24fee1e6f4f9a87",
+      "bytes": 3678
+    },
+    {
+      "path": "CHECKLIST-v3.3.md",
+      "sha256": "ef891d4b7b9061cabc3d6a9e2d1b79521b7495a853d8051326d5f1dd3565d407",
+      "bytes": 4177
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "c6eb6aea7a4a477cc74b9cba1f008d8b23353772a9f23b11eb84dddcdaf16349",
+      "bytes": 3727
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "cad0e4132869e02a6eb40ac847fef9fc2f720fdbb4d52cda902fc137e226baf0",
+      "bytes": 1607
+    },
+    {
+      "path": "README.md",
+      "sha256": "b3811940bc951d98517162bbef3b6127db05529a2b13cbe24d1c820fab6c700d",
+      "bytes": 11036
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "e941fdd84e4fec984fdb5cc6811e832ccf986c2fdb330b93229a2033b7e3d824",
+      "bytes": 77342
+    },
+    {
+      "path": "adr/ADR-000-why-v3.4-not-released.md",
+      "sha256": "49da7a2edd0ba578fc78fc0327c13fca05662d3aa2a6b1cb254bfaddd2d31e52",
+      "bytes": 5876
+    },
+    {
+      "path": "adr/ADR-002-implementation-drift-reversion.md",
+      "sha256": "18be4e616eba2b28300c4d8ce54726ba72e1d7ebb2b9e502acfc1842a48b95f4",
+      "bytes": 5271
+    },
+    {
+      "path": "adr/ADR-003-pre-flight-symmetry-and-argument-classification.md",
+      "sha256": "6b06bf92ea903a64a262318e0364acd7b8c1cebbb93ff2f4efb8d8108fee1644",
+      "bytes": 9149
+    },
+    {
+      "path": "adr/ARCHITECTURAL-INVARIANTS.md",
+      "sha256": "df31e8d13433dfa91fa2bee8ff784cd7cf4eef16d521e0da32aeb07c9f726dfa",
+      "bytes": 3660
+    },
+    {
+      "path": "adr/M1-ACCEPTANCE-CRITERIA.md",
+      "sha256": "334730831deceebbac585ddf5305677b686c7ee341e4bc39ecb5135f92c0ccc0",
+      "bytes": 4624
+    },
+    {
+      "path": "adr/MILESTONES.md",
+      "sha256": "23df79c2a5f3c1702ba344bb893cb749a86a7b861f6abdb55eaf621ac4c5d924",
+      "bytes": 4792
+    },
+    {
+      "path": "adr/RFC-0001-mission-policy.md",
+      "sha256": "ac263c51f01d03767efac451b72045aff3e0e1552c31e8c78c0b0474766f0f04",
+      "bytes": 11048
+    },
+    {
+      "path": "adr/RFC-0003-review-provider-architecture.md",
+      "sha256": "cb6218d3b416b690be3055032c882b19a5f194035e6e453e974cf25ee7defa79",
+      "bytes": 9007
+    },
+    {
+      "path": "docs/adaptive-execution-profiles-implementation-reference.md",
+      "sha256": "9758c22e2f1472eb94fb25bae4f0cc455f102e8d5438543ba40cc21b933bb547",
+      "bytes": 38586
+    },
+    {
+      "path": "docs/execution-contract-specification-v1.0.md",
+      "sha256": "a9e34a02ecc0ef4ef2693b5433ca725c3129853810fe36f93e2ceefca4b6239c",
+      "bytes": 8019
+    },
+    {
+      "path": "references/CHANGELOG.md",
+      "sha256": "757a825d7dfb9d45bf02020525c29922de48dfdfe6740b15bb4777ef0d549415",
+      "bytes": 6609
+    },
+    {
+      "path": "references/run-audit-optimizer.md",
+      "sha256": "cbb6b957fb3782dc8eb4ff8799629b3a699328dde1142b895cf9c04355672705",
+      "bytes": 7563
+    },
+    {
+      "path": "skills/gsd/precheck-gate.md",
+      "sha256": "a4556ecfad77716e817d6c1ee25c7796348f05a2647875eca4da92fa48040c6c",
+      "bytes": 1249
+    },
+    {
+      "path": "skills/gsd/research-phase.md",
+      "sha256": "f1e213377c3365235222027e89d8635c457fec9dba8e2ce861b8101047d73e35",
+      "bytes": 4677
+    }
+  ]
+}

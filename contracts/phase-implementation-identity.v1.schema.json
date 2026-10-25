@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phase-implementation-identity.v1",
+  "title": "Phase implementation identity v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "phase_id", "implementation_version", "phase_specification_hash", "capability_ref", "capability_version", "source_state_manifest_ref", "status"],
+  "properties": {
+    "schema": {"const": "phase-implementation-identity.v1"},
+    "phase_id": {"const": "P036"},
+    "implementation_version": {"const": "1.0.2"},
+    "phase_specification_hash": {"pattern": "^sha256:[a-f0-9]{64}$"},
+    "capability_ref": {"const": "capabilities/security-audit.v1.0.0.json"},
+    "capability_version": {"const": "1.0.2"},
+    "source_state_manifest_ref": {"const": "docs/assurance/PHASE-036-SOURCE-STATE-MANIFEST-v1.json"},
+    "status": {"enum": ["implemented_pending_independent_review", "accepted"]}
+  }
+}

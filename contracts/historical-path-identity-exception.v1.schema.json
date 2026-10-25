@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "historical-path-identity-exception.v1",
+  "title": "Historical Path Identity Exception v1",
+  "description": "Machine-readable, bounded evidence explaining an intentional historical artifact-path and contract-$id mismatch. It cannot establish authority or admissibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "record_type",
+    "exception_id",
+    "contract_family",
+    "contract_version",
+    "schema_id",
+    "artifact_path",
+    "source_digest",
+    "source_revision",
+    "owner_decision_ref",
+    "validity_scope",
+    "exception_status",
+    "constraints"
+  ],
+  "properties": {
+    "schema": { "const": "historical-path-identity-exception.v1" },
+    "record_type": { "const": "historical_path_identity_exception" },
+    "exception_id": { "$ref": "#/$defs/identifier" },
+    "contract_family": { "$ref": "#/$defs/identifier" },
+    "contract_version": { "$ref": "#/$defs/version" },
+    "schema_id": { "$ref": "#/$defs/identifier" },
+    "artifact_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/][^\\x00]*$"
+    },
+    "source_digest": { "$ref": "#/$defs/digest" },
+    "source_revision": { "type": "string", "minLength": 1 },
+    "owner_decision_ref": { "$ref": "#/$defs/reference" },
+    "validity_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id"],
+      "properties": {
+        "scope_type": { "$ref": "#/$defs/identifier" },
+        "scope_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "exception_status": {
+      "enum": ["active", "revoked", "expired", "superseded", "invalid", "unresolved"]
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["non_authoritative", "non_admissibility_granting", "non_transferable"],
+      "properties": {
+        "non_authoritative": { "const": true },
+        "non_admissibility_granting": { "const": true },
+        "non_transferable": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": { "$ref": "#/$defs/identifier" },
+        "id": { "$ref": "#/$defs/identifier" },
+        "version": { "$ref": "#/$defs/version" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  }
+}

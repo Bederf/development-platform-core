@@ -1,0 +1,151 @@
+schema: forge-gateway-contract-conformance-fixtures.v1
+version: 1.0.0
+families:
+  - evaluation.v1
+  - evidence.v1
+  - policy-decision.v1
+  - engineering-execution.v1
+cases:
+  - id: positive-repository-architecture-flow
+    class: positive
+    expected: satisfied
+    test: test_positive_repository_architecture_flow
+    assertions:
+      - repository mutation is exactly policy-bound before execution
+      - evaluation and evidence remain non-authoritative
+  - id: positive-capability-conformance-flow
+    class: positive
+    expected: satisfied
+    test: test_positive_capability_conformance_flow
+    assertions:
+      - package compilation uses the same four families without a repository-specific branch
+      - target and operation semantics differ from the repository example
+  - id: negative-proposal-is-not-authority
+    class: negative
+    expected: rejected
+    test: test_negative_proposal_is_not_authority
+    mutation: invoke executor with an execution proposal and no allow decision
+  - id: negative-evaluation-is-not-acceptance
+    class: negative
+    expected: rejected
+    test: test_negative_evaluation_is_not_acceptance
+    mutation: add acceptance fields to an evaluation result
+  - id: negative-evidence-is-not-authority
+    class: negative
+    expected: rejected
+    test: test_negative_evidence_is_not_authority
+    mutation: use an evidence record as an authorized execution request
+  - id: negative-missing-evidence-cannot-pass
+    class: negative
+    expected: rejected
+    test: test_negative_missing_evidence_cannot_pass
+    mutation: report a satisfied evaluation with no direct supports
+  - id: adversarial-baseline-substitution
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_baseline_substitution
+    mutation: preserve request identity while replacing the immutable baseline digest
+  - id: adversarial-decision-expiry-and-replay
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_decision_expiry_and_single_use_replay
+    mutation: consume an expired decision or reuse a single-use decision
+  - id: adversarial-mutable-proposal-retrieval
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_mutable_proposal_retrieval
+    mutation: omit executable fields and require Gateway to retrieve proposal content
+  - id: adversarial-broadened-execution-scope
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_broadened_execution_scope
+    mutation: widen enforced constraints after policy authorization and recompute the digest
+  - id: adversarial-issuer-confusion
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_issuer_confusion
+    mutation: preserve an issuer name while replacing its authority binding
+  - id: adversarial-status-collapse
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_status_collapse
+    mutation: normalize timeout to satisfied
+  - id: adversarial-evidence-owned-admission
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_evidence_owned_admission
+    mutation: create an EvidenceAdmissionResult instead of composing Evaluation and PolicyDecision
+  - id: adversarial-preserve-denied-evidence
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_preserve_denied_evidence
+    mutation: create an EvidenceRecord from a denied admission decision
+  - id: adversarial-unattributed-result
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_unattributed_result
+    mutation: issue a materialized result without issuer or authority binding
+  - id: adversarial-unavailable-as-known
+    class: adversarial
+    expected: rejected
+    test: test_adversarial_unavailable_as_empty
+    mutation: provide known collection values while declaring the collection unavailable
+  - id: regression-frozen-verification-failed
+    class: regression
+    expected: unknown
+    test: test_regression_frozen_verification_failed_remains_unknown
+    source_schema: verification-result.v1
+    source_status: FAILED
+  - id: regression-frozen-verification-not-run
+    class: regression
+    expected: unknown
+    test: test_regression_frozen_verification_not_run_remains_unknown
+    source_schema: verification-result.v1
+    source_status: NOT_RUN
+  - id: regression-wrong-domain-decision
+    class: regression
+    expected: rejected
+    test: test_regression_wrong_domain_decision_is_rejected
+    mutation: use an admission decision to authorize engineering execution
+  - id: regression-replayed-admission-decision
+    class: regression
+    expected: rejected
+    test: test_regression_replayed_admission_decision_is_rejected
+    mutation: preserve evidence twice under one single-use admission decision
+  - id: regression-mismatched-evidence-digest
+    class: regression
+    expected: rejected
+    test: test_regression_mismatched_evidence_digest_is_rejected
+    mutation: replace the candidate digest while retaining candidate identity
+  - id: regression-mismatched-evidence-type
+    class: regression
+    expected: rejected
+    test: test_regression_mismatched_evidence_type_is_rejected
+    mutation: submit a policy decision through the evidence candidate reference
+  - id: regression-wrong-independence-role
+    class: regression
+    expected: rejected
+    test: test_regression_wrong_independence_role_is_rejected
+    mutation: bind the evaluator as the subject producer when profile separation is required
+  - id: regression-wrong-request-result-correlation
+    class: regression
+    expected: rejected
+    test: test_regression_wrong_request_result_correlation_is_rejected
+    mutation: correlate an EvaluationResult to a PolicyRequest
+  - id: regression-admission-decision-wrong-evaluation
+    class: regression
+    expected: rejected
+    test: test_regression_admission_decision_must_consume_exact_evaluation
+    mutation: pair an admission decision with an EvaluationResult it did not consume
+  - id: regression-allow-with-conditions
+    class: regression
+    expected: rejected
+    test: test_regression_allow_cannot_carry_conditions
+    mutation: attach unresolved conditions to allow
+  - id: fixture-traceability
+    class: meta
+    expected: satisfied
+    test: test_conformance_fixture_traceability
+    assertions:
+      - every fixture ID is unique
+      - every fixture points to an executable test

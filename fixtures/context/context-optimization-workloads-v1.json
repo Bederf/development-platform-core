@@ -1,0 +1,12 @@
+{
+  "schema": "context-optimization-workloads.v1",
+  "description": "Representative bounded payload shapes for comparing whole-section projection with reversible optimization.",
+  "workloads": [
+    {"id": "serena-symbol-output", "objective": "calculate_total implementation references definition", "kind": "code", "repeat": "calculate_total definition references implementation ", "repeat_count": 500},
+    {"id": "context7-documentation", "objective": "documentation API migration configuration", "kind": "documentation", "repeat": "documentation API migration configuration ", "repeat_count": 600},
+    {"id": "chrome-devtools-log", "objective": "network request response console warning", "kind": "log", "repeat": "network request response console warning ", "repeat_count": 650},
+    {"id": "forge-test-output", "objective": "test verification artifact assertion", "kind": "test-output", "repeat": "test verification artifact assertion ", "repeat_count": 700},
+    {"id": "herdr-observations", "objective": "execution lifecycle artifact attempt provider", "kind": "runtime-event", "repeat": "execution lifecycle artifact attempt provider ", "repeat_count": 650},
+    {"id": "git-diff", "objective": "implementation integration", "kind": "diff", "repeat": "+ implementation integration\n- implementation integration\n", "repeat_count": 500}
+  ]
+}

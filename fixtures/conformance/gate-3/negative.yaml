@@ -1,0 +1,225 @@
+fixture_format: pre-schema-semantic-fixture.v1
+category: negative
+fixtures:
+  - fixture_id: NEG-001
+    title: Declaration is treated as authority
+    given:
+      declaration: fixture.requirement.deploy
+      issuer: fixture.actor.unrecognized
+      authority_binding: null
+    when: treat publication as authorization
+    expected:
+      verdict: FAIL
+      outcome: authority-missing
+      reason_codes: [DECLARATION_NOT_AUTHORITY]
+    covers:
+      operations: [Declaration]
+      invariants: []
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-002
+    title: Observation is promoted directly to truth and evidence
+    given:
+      observation: fixture.observation.provider-success
+      evidence_admission: null
+      evaluation: null
+    when: assert the observed subject is true and accepted
+    expected:
+      verdict: FAIL
+      outcome: observation-boundary-violated
+      reason_codes: [OBSERVATION_NOT_TRUTH, OBSERVATION_NOT_EVIDENCE]
+    covers:
+      operations: [Observation]
+      invariants: [3, 10]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-003
+    title: Resolution is treated as permission
+    given:
+      selection_result: fixture.selection.impl-alpha
+      policy_decision: null
+    when: create an active binding
+    expected:
+      verdict: FAIL
+      outcome: permission-missing
+      reason_codes: [RESOLUTION_NOT_PERMISSION]
+    covers:
+      operations: [Resolution]
+      invariants: [4, 10]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-004
+    title: Completed execution is treated as successful outcome
+    given:
+      execution_result: {status: completed, artifacts: [fixture.artifact.binary]}
+      evaluation_result: null
+    when: mark acceptance criteria satisfied
+    expected:
+      verdict: FAIL
+      outcome: success-unproven
+      reason_codes: [EXECUTION_NOT_SUCCESS]
+    covers:
+      operations: [Execution]
+      invariants: [10]
+      relationships: []
+      conformance_dimensions: {behavioral: failed}
+
+  - fixture_id: NEG-005
+    title: Satisfied evaluation is treated as release acceptance
+    given:
+      evaluation: fixture.evaluation.tests
+      claim_result: satisfied
+      policy_decision: null
+      accountable_acceptance: null
+    when: authorize release
+    expected:
+      verdict: FAIL
+      outcome: acceptance-missing
+      reason_codes: [EVALUATION_NOT_ACCEPTANCE]
+    covers:
+      operations: [Evaluation]
+      invariants: [2, 10]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-006
+    title: Policy rewrites failed evidence to satisfied
+    given:
+      evidence_record: {id: fixture.evidence.failed-test, result: failed}
+      policy_decision: allowed-with-exception
+    when: mutate the evidence result to satisfied
+    expected:
+      verdict: FAIL
+      outcome: evidence-mutation-prohibited
+      reason_codes: [POLICY_MUST_NOT_MODIFY_EVIDENCE, HISTORY_IMMUTABLE]
+    covers:
+      operations: [Resolution]
+      invariants: [1, 10]
+      relationships: []
+      conformance_dimensions: {behavioral: failed}
+
+  - fixture_id: NEG-007
+    title: Required capability has no conformant binding
+    given:
+      requirement: fixture.requirement.evidence
+      strength: required
+      bindings: []
+    when: report composition ready
+    expected:
+      verdict: FAIL
+      outcome: unresolved-required-capability
+      reason_codes: [REQUIRED_BINDING_MISSING]
+    covers:
+      operations: [Declaration, Resolution]
+      invariants: [5]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-008
+    title: Current lifecycle state lacks transition history
+    given:
+      current_state: active
+      transition_records: []
+    when: claim replayable lifecycle conformance
+    expected:
+      verdict: FAIL
+      outcome: history-missing
+      reason_codes: [CURRENT_STATE_WITHOUT_TRANSITION]
+    covers:
+      operations: [Observation, Evaluation]
+      invariants: [8]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-009
+    title: Derived context omits direct supports
+    given:
+      context_bundle: fixture.context.bundle-1
+      direct_supports: []
+      method: fixture.method.context-compile@1.0.0
+    when: claim attributable derivation
+    expected:
+      verdict: FAIL
+      outcome: lineage-incomplete
+      reason_codes: [DIRECT_SUPPORTS_REQUIRED]
+    covers:
+      operations: [Resolution]
+      invariants: [11]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-010
+    title: Probabilistic evaluator replaces deterministic authorization
+    given:
+      requested_action: write-repository
+      deterministic_policy: denied
+      model_judgment: likely-safe
+    when: execute using model judgment as authorization
+    expected:
+      verdict: FAIL
+      outcome: deterministic-boundary-bypassed
+      reason_codes: [PROBABILISTIC_SECURITY_REPLACEMENT, EXECUTION_UNAUTHORIZED]
+    covers:
+      operations: [Evaluation, Execution]
+      invariants: [4, 9]
+      relationships: []
+      conformance_dimensions: {behavioral: failed}
+
+  - fixture_id: NEG-011
+    title: Application runtime becomes a universal Core requirement
+    given:
+      application_requirement: fixture.capability.http-runtime
+      project_scope: fixture.project.web-only
+    when: add the requirement to every Core composition
+    expected:
+      verdict: FAIL
+      outcome: application-boundary-violated
+      reason_codes: [APPLICATION_EXECUTION_NOT_UNIVERSAL]
+    covers:
+      operations: [Declaration]
+      invariants: [12]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-012
+    title: Provider name acquires constitutional authority
+    given:
+      implementation: fixture.provider.alpha
+      popularity: high
+      constitutional_binding: null
+    when: treat provider convention as platform meaning
+    expected:
+      verdict: FAIL
+      outcome: implementation-leakage
+      reason_codes: [IMPLEMENTATION_NOT_CONSTITUTIONAL]
+    covers:
+      operations: [Declaration]
+      invariants: [13]
+      relationships: []
+      conformance_dimensions: {semantic: failed}
+
+  - fixture_id: NEG-013
+    title: All conformance dimensions fail for independent reasons
+    given:
+      implementation: fixture.impl.invalid
+      structural_issue: required capability identity missing
+      semantic_issue: declared responsibility contradicts base capability
+      behavioral_issue: fake execution returns success on denied action
+      operational_issue: required service is unavailable and evidence expired
+    when: evaluate multidimensional conformance
+    expected:
+      verdict: FAIL
+      outcome: nonconformant
+      reason_codes: [STRUCTURAL_FAILURE, SEMANTIC_FAILURE, BEHAVIORAL_FAILURE, OPERATIONAL_FAILURE]
+    covers:
+      operations: [Evaluation]
+      invariants: [4, 7, 9, 10]
+      relationships: [CONFORMS_TO]
+      conformance_dimensions:
+        structural: failed
+        semantic: failed
+        behavioral: failed
+        operational: failed

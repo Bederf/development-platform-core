@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "security-audit-build-run.v1",
+  "title": "Core build-time security-audit run v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "run_id", "repo", "source_ref", "profile", "scope_paths", "execution_policy", "cloudflare_source", "run_status", "incomplete_reason", "sandbox_status", "target_execution", "required_artifacts", "validator_identities", "authority_boundary"],
+  "properties": {
+    "schema": {"const": "security-audit-build-run.v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "repo": {"type": "string", "minLength": 1},
+    "source_ref": {"type": "string", "minLength": 1},
+    "profile": {"enum": ["quick", "full"]},
+    "scope_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "execution_policy": {"const": "source-only-local"},
+    "cloudflare_source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository", "commit", "manifest_ref"],
+      "properties": {
+        "repository": {"const": "https://github.com/cloudflare/security-audit-skill"},
+        "commit": {"const": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8"},
+        "manifest_ref": {"const": "docs/assurance/CLOUDFLARE-SECURITY-AUDIT-SOURCE-MANIFEST-v1.json"}
+      }
+    },
+    "run_status": {"enum": ["complete", "incomplete", "blocked"]},
+    "incomplete_reason": {"type": ["string", "null"]},
+    "sandbox_status": {"const": "NOT_TESTED"},
+    "target_execution": {"const": "BLOCKED"},
+    "required_artifacts": {
+      "const": ["run-metadata.json", "architecture.md", "coverage-ledger.json", "findings.json", "REPORT.md", "FINDINGS-DETAIL.md", "NEEDS-VALIDATION.md"]
+    },
+    "validator_identities": {
+      "type": "object", "additionalProperties": false, "required": ["coverage", "findings"],
+      "properties": {
+        "coverage": {"const": "skills/security-audit/validate-coverage-ledger.cjs@c1c8a8c1471069fb0e188eeaff69b8e8db6564a8"},
+        "findings": {"const": "skills/security-audit/validate-findings.cjs@c1c8a8c1471069fb0e188eeaff69b8e8db6564a8"}
+      }
+    },
+    "authority_boundary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["forge_non_authoritative", "production_authority_granted", "consumer_workflows_enabled", "runtime_enabled", "opensandbox_target_execution"],
+      "properties": {
+        "forge_non_authoritative": {"const": true},
+        "production_authority_granted": {"const": false},
+        "consumer_workflows_enabled": {"const": false},
+        "runtime_enabled": {"const": false},
+        "opensandbox_target_execution": {"const": false}
+      }
+    }
+  }
+}

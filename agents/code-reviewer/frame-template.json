@@ -1,0 +1,32 @@
+{
+  "schema": "code-review-frame.v1",
+  "frame_id": "<unique-review-attempt-id>",
+  "mission": "Independently evaluate one GSD implementation attempt.",
+  "objective": "Determine whether the current diff satisfies the governing specification and is ready for verification/completion.",
+  "scope": {
+    "repository": "<repository-root>",
+    "phase_or_plan": "<phase-or-plan-id>",
+    "changed_files": [],
+    "out_of_scope": ["editing files", "merging", "deployment", "production approval"]
+  },
+  "evidence": {
+    "required": ["specification", "diff", "tests", "architecture-or-contracts"],
+    "provided": []
+  },
+  "success_criteria": [
+    "All applicable acceptance criteria are covered.",
+    "No blocker or major correctness, security, scope, or evidence gap remains.",
+    "Review output is structured and traceable."
+  ],
+  "constraints": [
+    "read-only tools only",
+    "fresh context separate from implementation agent",
+    "no unsupported assumptions",
+    "incomplete evidence is reported explicitly"
+  ],
+  "approval": {
+    "required_for_activation": true,
+    "required_for_execution": false,
+    "production_authority": false
+  }
+}

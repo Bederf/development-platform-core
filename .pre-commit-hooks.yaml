@@ -1,0 +1,7 @@
+- id: development-platform-core-gate
+  name: Development Platform Core gate
+  description: Run the shared Core deterministic hygiene, generic security, and syntax gate (AI review is push-only).
+  entry: bin/development-platform-pre-commit
+  language: unsupported_script
+  pass_filenames: false
+  stages: [pre-commit]

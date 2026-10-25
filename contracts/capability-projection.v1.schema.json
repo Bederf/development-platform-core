@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "capability-projection.v1",
+  "title": "Capability Projection Plan v1",
+  "description": "Provider-neutral plan for exposing a Core capability to a harness. A projection plan is not installation, activation, authorization, or connection health.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "projection_id", "capability", "source", "harness", "status", "activation_policy"],
+  "properties": {
+    "schema": {"const": "capability-projection.v1"},
+    "projection_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,159}$"},
+    "capability": {"$ref": "#/$defs/reference"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "content_identity"],
+      "properties": {
+        "kind": {"enum": ["skill", "plugin", "mcp"]},
+        "path": {"type": "string", "minLength": 1},
+        "content_identity": {"type": "string", "minLength": 1}
+      }
+    },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["harness_id", "adapter_id", "adapter_version"],
+      "properties": {
+        "harness_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+        "adapter_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$"},
+        "adapter_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    },
+    "target": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["skill_root", "prompt_input", "plugin_registry", "mcp_registry"]},
+        "reference": {"type": "string", "minLength": 1}
+      },
+      "required": ["kind", "reference"]
+    },
+    "status": {"enum": ["discovered", "planned", "unavailable", "verified"]},
+    "activation_policy": {"enum": ["explicit_adapter_action", "consumer_managed", "not_applicable"]},
+    "provenance": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "source_reference": {"type": "string", "minLength": 1},
+        "source_digest": {"type": "string", "minLength": 1},
+        "generated_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version"],
+      "properties": {
+        "semantic_type": {"type": "string", "minLength": 1},
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,159}$"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    }
+  }
+}

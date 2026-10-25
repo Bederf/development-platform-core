@@ -1,0 +1,100 @@
+schema: agent-skill-capability-discovery-activation-conformance.v1
+status: candidate-qualification
+authority: fixture-expectations-only
+description: >-
+  Provider-free W1 scenarios for discovery, activation, Skill procedure,
+  policy authority, Tool Broker enforcement, MCP integration, and lineage.
+  These cases do not establish a runtime contract or provider conformance.
+cases:
+  - id: positive-one-shot-capability-dispatch
+    discovery: assessed
+    selection: conformant
+    activation: bounded
+    skill_instructions: descriptive
+    policy: allow
+    broker: dispatch
+    adapter: mcp
+    execution: completed
+    expected: authorized-dispatch-result
+  - id: discovery-is-not-conformance
+    discovery: assessed
+    selection: unresolved
+    activation: none
+    skill_instructions: descriptive
+    policy: unknown
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: discovery-cannot-self-admit
+  - id: unselected-capability
+    discovery: assessed
+    selection: absent
+    activation: requested
+    skill_instructions: descriptive
+    policy: allow
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: activation-requires-selection-binding
+  - id: skill-instruction-cannot-authorize
+    discovery: assessed
+    selection: conformant
+    activation: bounded
+    skill_instructions: claims-approval
+    policy: absent
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: instruction-is-not-authority
+  - id: policy-subject-tool-mismatch
+    discovery: assessed
+    selection: conformant
+    activation: bounded
+    skill_instructions: descriptive
+    policy: allow-different-tool
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: exact-policy-tool-match-required
+  - id: stale-activation
+    discovery: assessed
+    selection: conformant
+    activation: expired
+    skill_instructions: descriptive
+    policy: allow
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: stale-activation-cannot-dispatch
+  - id: unavailable-discovery
+    discovery: unavailable
+    selection: unresolved
+    activation: none
+    skill_instructions: absent
+    policy: unknown
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: unavailable-state-fails-closed
+  - id: jev-score-is-not-authorization
+    discovery: assessed
+    selection: conformant
+    activation: bounded
+    skill_instructions: descriptive
+    evaluator_signal: risk-0.97
+    policy: absent
+    broker: block
+    adapter: none
+    execution: not_run
+    expected: evaluation-signal-requires-policy
+  - id: mcp-result-is-not-verification
+    discovery: assessed
+    selection: conformant
+    activation: bounded
+    skill_instructions: descriptive
+    policy: allow
+    broker: dispatch
+    adapter: mcp
+    execution: completed
+    verification: required
+    expected: mcp-result-remains-unverified

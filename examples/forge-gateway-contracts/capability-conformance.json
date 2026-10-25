@@ -1,0 +1,10 @@
+{
+  "example_id": "capability-conformance",
+  "context": "capability",
+  "operation": "compile-package",
+  "target_semantic_type": "implementation",
+  "arguments": {
+    "module": "bounded.library"
+  },
+  "asserted_use": "Authorize deterministic package compilation, evaluate a capability claim, and preserve admitted evidence without granting a binding."
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: Context7
+  short_description: Retrieve current library documentation
+  default_prompt: Use Context7 to verify the current API and usage for the external libraries involved in this task.

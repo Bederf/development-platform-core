@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Run a bounded AGY review for the Core OCR hook contract."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path, PurePosixPath
+import subprocess
+import sys
+import uuid
+
+MAX_FILE_BYTES = 512 * 1024
+MAX_TOTAL_BYTES = 2 * 1024 * 1024
+
+
+def fail(message: str) -> int:
+    print(f"agy OCR adapter failed: {message}", file=sys.stderr)
+    return 1
+
+
+def read_inputs(names: list[str]) -> tuple[list[str], str]:
+    if not names:
+        raise ValueError("no files were supplied")
+    total = 0
+    sections: list[str] = []
+    for name in names:
+        relative = PurePosixPath(name)
+        if relative.is_absolute() or ".." in relative.parts or ".git" in relative.parts:
+            raise ValueError(f"unsafe review path: {name}")
+        path = Path(name)
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"review path is not a regular file: {name}")
+        data = path.read_bytes()
+        if len(data) > MAX_FILE_BYTES:
+            raise ValueError(f"review file exceeds size limit: {name}")
+        total += len(data)
+        if total > MAX_TOTAL_BYTES:
+            raise ValueError("review input exceeds total size limit")
+        text = data.decode("utf-8")
+        sections.append(f"FILE: {name}\n<CONTENT>\n{text}\n</CONTENT>")
+    return names, "\n\n".join(sections)
+
+
+def extract_payload(raw: str) -> dict:
+    value = json.loads(raw)
+    if isinstance(value, dict) and isinstance(value.get("structured_output"), dict):
+        value = value["structured_output"]
+    elif isinstance(value, dict) and isinstance(value.get("response"), str):
+        value = json.loads(value["response"])
+    if not isinstance(value, dict):
+        raise ValueError("AGY result is not a JSON object")
+    return value
+
+
+def persist_raw(raw: str, request_id: str) -> str | None:
+    root_value = os.environ.get("AGY_OCR_EVIDENCE_ROOT")
+    if not root_value:
+        return None
+    root = Path(root_value).resolve()
+    destination = root / request_id
+    destination.mkdir(mode=0o700, parents=True, exist_ok=False)
+    path = destination / "raw-provider-response.json"
+    path.write_text(raw, encoding="utf-8")
+    path.chmod(0o600)
+    return str(path)
+
+
+def main() -> int:
+    try:
+        names, files = read_inputs(sys.argv[1:])
+        model = os.environ.get("AGY_OCR_MODEL", "gemini-3.8-flash-low")
+        command = os.environ.get("AGY_COMMAND", "agy")
+        manifest = "\n".join(f"- {name}" for name in names)
+        prompt = (
+            "You are the read-only AGY content-verification reviewer. Review only the supplied "
+            "file contents. Do not call tools, access other paths, modify files, or infer "
+            "repository context. The authoritative manifest contains exactly "
+            f"{len(names)} files:\n{manifest}\n\n"
+            "Return ONLY a JSON object with this shape: "
+            '{"status":"complete","summary":{"files_reviewed":N},"findings":[]} . '
+            f"Set N to exactly {len(names)}. Count every manifest entry. findings must be "
+            "an array of concise review findings; an empty array is valid.\n\n" + files
+        )
+        completed = subprocess.run(
+            [
+                command, "--model", model, "--sandbox", "--mode", "plan",
+                "--output-format", "json", "--disable-slash-commands",
+                f"--print={prompt}",
+            ],
+            capture_output=True, text=True, timeout=240, check=False,
+        )
+        raw = completed.stdout.strip()
+        request_id = os.environ.get("AGY_OCR_REQUEST_ID", "ocr-" + uuid.uuid4().hex)
+        raw_ref = persist_raw(raw, request_id) if raw else None
+        if completed.returncode:
+            raise ValueError(f"AGY exited with status {completed.returncode}")
+        payload = extract_payload(raw)
+        status = payload.get("status")
+        summary = payload.get("summary")
+        if status not in {"complete", "completed", "success"}:
+            raise ValueError("AGY result is incomplete")
+        if not isinstance(summary, dict) or summary.get("files_reviewed") != len(names):
+            raise ValueError("AGY result has incomplete file coverage")
+        findings = payload.get("findings", [])
+        if not isinstance(findings, list):
+            raise ValueError("AGY findings must be an array")
+        result = {
+            "status": "complete",
+            "summary": {"files_reviewed": len(names), "provider": "agy", "model": model},
+            "findings": findings,
+        }
+        if raw_ref:
+            result["evidence"] = {"raw_provider_response": raw_ref, "request_id": request_id}
+        print(json.dumps(result, separators=(",", ":")))
+        return 0
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError, subprocess.TimeoutExpired) as exc:
+        return fail(str(exc))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

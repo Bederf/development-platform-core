@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "working-state-checkpoint-event.v1",
+  "title": "Working State Checkpoint Event v1",
+  "description": "A bounded derived handoff from a GSD/Radix boundary to a disposable working-state projection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "event_id", "project_id", "session_id", "gsd_ref", "session_record_refs",
+    "source_digests", "objective", "phase", "completed_summary", "discovery_summary",
+    "failure_summary", "next_step", "blocker", "reason", "occurred_at", "event_digest"
+  ],
+  "properties": {
+    "schema": {"const": "working-state-checkpoint-event.v1"},
+    "event_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "session_id": {"type": "string", "minLength": 1},
+    "gsd_ref": {"type": "string", "minLength": 1},
+    "session_record_refs": {"type": "array", "uniqueItems": true, "maxItems": 32, "items": {"type": "string", "minLength": 1}},
+    "source_digests": {
+      "type": "object", "additionalProperties": false, "required": ["gsd"],
+      "properties": {"gsd": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+    },
+    "objective": {"type": "string", "minLength": 1},
+    "phase": {},
+    "completed_summary": {"$ref": "#/$defs/summary"},
+    "discovery_summary": {"$ref": "#/$defs/summary"},
+    "failure_summary": {"$ref": "#/$defs/summary"},
+    "next_step": {"type": "string", "minLength": 1},
+    "blocker": {"type": "string", "minLength": 1},
+    "reason": {"enum": ["startup", "transition", "handoff", "terminal"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "event_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "summary": {
+      "type": "array", "maxItems": 32,
+      "items": {"type": "string", "minLength": 1, "maxLength": 240}
+    }
+  }
+}

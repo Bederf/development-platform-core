@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "change-surface-verification.v1",
+  "title": "Change-Surface Verification Observation v1",
+  "description": "Provider-neutral, non-authoritative comparison of an authorized expected change surface and an observed actual change surface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "signal", "authoritative", "identity", "reasons"],
+  "properties": {
+    "schema": {"const": "change-surface-verification.v1"},
+    "signal": {"enum": ["PASS", "REVIEW_REQUIRED", "INCOMPLETE"]},
+    "authoritative": {"const": false},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "phase_id", "work_id", "request_id", "attempt_id", "repository", "baseline"],
+      "properties": {
+        "project_id": {"type": "string", "minLength": 1},
+        "phase_id": {"type": "string", "minLength": 1},
+        "work_id": {"type": "string", "minLength": 1},
+        "request_id": {"type": "string", "minLength": 1},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "repository": {"type": "string", "minLength": 1},
+        "baseline": {"type": "string", "minLength": 1}
+      }
+    },
+    "reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "expected_digest": {"type": "string", "minLength": 1},
+    "actual_digest": {"type": "string", "minLength": 1},
+    "observation": {"type": "object"}
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "architecture-artifact-manifest.v1",
+  "title": "Architecture Artifact Manifest v1",
+  "description": "Manifest for derived architecture graph and rendered artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "artifact_id", "graph_ref", "generated_at", "artifacts", "limitations"],
+  "properties": {
+    "schema": {"const": "architecture-artifact-manifest.v1"},
+    "artifact_id": {"$ref": "#/$defs/id"},
+    "graph_ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["graph_id", "graph_version", "digest"],
+      "properties": {
+        "graph_id": {"$ref": "#/$defs/id"},
+        "graph_version": {"$ref": "#/$defs/version"},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "artifacts": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["kind", "path", "digest"],
+        "properties": {
+          "kind": {"enum": ["graph", "svg", "delta", "manifest"]},
+          "path": {"type": "string", "minLength": 1},
+          "digest": {"$ref": "#/$defs/digest"}
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"}
+  }
+}

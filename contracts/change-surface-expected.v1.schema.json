@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "change-surface-expected.v1",
+  "title": "Expected Change Surface v1",
+  "description": "Authorized, versioned expected change-surface evidence for Forge comparison.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "canonicalization", "identity", "authority_ref", "expected_paths", "expected_path_prefixes", "authorized_expansions", "expected_components", "expected_sensitive_dimensions", "risk_context", "policies", "evidence_digest"],
+  "properties": {
+    "schema": {"const": "change-surface-expected.v1"},
+    "canonicalization": {"const": "json-sort-keys-separators-v1"},
+    "identity": {"$ref": "#/$defs/identity"},
+    "authority_ref": {"type": "string", "minLength": 1},
+    "expected_paths": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+    "expected_path_prefixes": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+    "authorized_expansions": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+    "expected_components": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "expected_sensitive_dimensions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "risk_context": {"$ref": "#/$defs/risk"},
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_categories"],
+      "properties": {"allowed_categories": {"type": "array", "items": {"type": "string", "minLength": 1}}}
+    },
+    "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "phase_id", "work_id", "request_id", "attempt_id", "repository", "baseline"],
+      "properties": {
+        "project_id": {"type": "string", "minLength": 1},
+        "phase_id": {"type": "string", "minLength": 1},
+        "work_id": {"type": "string", "minLength": 1},
+        "request_id": {"type": "string", "minLength": 1},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "repository": {"type": "string", "minLength": 1},
+        "baseline": {"type": "string", "minLength": 1}
+      }
+    },
+    "path": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk", "blast_radius"],
+      "properties": {
+        "risk": {"enum": ["low", "medium", "high"]},
+        "blast_radius": {"enum": ["low", "medium", "high"]}
+      }
+    }
+  }
+}

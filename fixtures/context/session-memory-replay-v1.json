@@ -1,0 +1,57 @@
+{
+  "schema": "session-memory-replay.v1",
+  "records": [
+    {
+      "memory_id": "memory-a",
+      "project_id": "project-a",
+      "session_id": "session-a",
+      "execution_id": "execution-a",
+      "lineage_id": "lineage-a",
+      "source_ref": "session:record-a:event:instruction:missing-test",
+      "source_digest": "255131f1d7ad3439e52e6721a028093adbd6128419fa8119973275238c9aed9f",
+      "content": "dependency check failed during integration",
+      "authority_class": "informational",
+      "trust_class": "observed",
+      "relevance": 0.9
+    },
+    {
+      "memory_id": "memory-b",
+      "project_id": "project-a",
+      "session_id": "session-b",
+      "execution_id": "execution-b",
+      "lineage_id": "lineage-b",
+      "source_ref": "session:record-b:event:instruction:missing-test",
+      "source_digest": "9cac356e6559d68d2f206b381cbab859299cede9992797d12404ab385e004734",
+      "content": "dependency check passed after remediation",
+      "authority_class": "informational",
+      "trust_class": "observed",
+      "relevance": 0.8
+    },
+    {
+      "memory_id": "memory-c",
+      "project_id": "project-b",
+      "session_id": "session-c",
+      "execution_id": "execution-c",
+      "lineage_id": "lineage-c",
+      "source_ref": "session:record-c:event:instruction:missing-test",
+      "source_digest": "2d28a08e79aa308df8c3c36e6d7c615984edea425fce17adb5a810b80fb00e64",
+      "content": "dependency check failed in another project",
+      "authority_class": "informational",
+      "trust_class": "observed",
+      "relevance": 1.0
+    },
+    {
+      "memory_id": "memory-authoritative",
+      "project_id": "project-a",
+      "session_id": "session-spec",
+      "execution_id": "execution-spec",
+      "lineage_id": "lineage-spec",
+      "source_ref": "specification:dependency-policy",
+      "source_digest": "7845646a1588efc52d5acef75b6f595b1fc44da737eaebf37c24855c9f86e356",
+      "content": "dependency check failed according to the current specification",
+      "authority_class": "authoritative",
+      "trust_class": "verified",
+      "relevance": 1.0
+    }
+  ]
+}

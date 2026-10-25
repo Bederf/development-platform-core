@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-binding.v1",
+  "title": "Independent Review Evidence Binding v1",
+  "description": "Core-owned, provider-neutral binding between a risk-selected independent review and its evidence lifecycle.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "binding_id",
+    "record_type",
+    "binding_status",
+    "subject",
+    "review",
+    "evidence",
+    "lifecycle",
+    "historical_reconciliation",
+    "binding_digest"
+  ],
+  "properties": {
+    "schema": {"const": "evidence-binding.v1"},
+    "binding_id": {"type": "string", "minLength": 1},
+    "record_type": {"enum": ["evidence_binding", "historical_reconciliation"]},
+    "binding_status": {
+      "enum": [
+        "ACTIVE",
+        "ELIGIBLE_FOR_DISPOSITION",
+        "DELETION_AUTHORIZED",
+        "DELETED",
+        "DELETION_BLOCKED",
+        "BOUND",
+        "PARTIALLY_BOUND",
+        "UNBOUND_INSUFFICIENT"
+      ]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_ref", "implementation_revision_ref", "implementation_context_id"],
+      "properties": {
+        "task_ref": {"type": ["string", "null"]},
+        "implementation_revision_ref": {"type": ["string", "null"]},
+        "implementation_context_id": {"type": ["string", "null"]}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_ref",
+        "reviewer_ref",
+        "reviewer_context_id",
+        "independence_required",
+        "core_invocation_id",
+        "provider"
+      ],
+      "properties": {
+        "request_ref": {"$ref": "#/$defs/identity_ref_or_null"},
+        "reviewer_ref": {"type": ["string", "null"]},
+        "reviewer_context_id": {"type": ["string", "null"]},
+        "independence_required": {"type": "boolean"},
+        "core_invocation_id": {"type": ["string", "null"]},
+        "provider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider_ref", "model", "provider_request_id", "provider_invocation_id"],
+          "properties": {
+            "provider_ref": {"type": ["string", "null"]},
+            "model": {"type": ["string", "null"]},
+            "provider_request_id": {"type": ["string", "null"]},
+            "provider_invocation_id": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw", "review_result", "review_cycle", "acceptance"],
+      "properties": {
+        "raw": {"$ref": "#/$defs/evidence_ref_or_null"},
+        "review_result": {"$ref": "#/$defs/identity_ref_or_null"},
+        "review_cycle": {"$ref": "#/$defs/identity_ref_or_null"},
+        "acceptance": {"$ref": "#/$defs/identity_ref_or_null"}
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retention_basis",
+        "policy_ref",
+        "state",
+        "eligible_at",
+        "eligibility_ref",
+        "eligibility_evaluated_by",
+        "deletion_authorization_ref",
+        "deletion_authorized_by",
+        "deletion_receipt"
+      ],
+      "properties": {
+        "retention_basis": {"const": "lifecycle-bound"},
+        "policy_ref": {"type": ["string", "null"]},
+        "state": {
+          "enum": [
+            "ACTIVE",
+            "ELIGIBLE_FOR_DISPOSITION",
+            "DELETION_AUTHORIZED",
+            "DELETED",
+            "DELETION_BLOCKED"
+          ]
+        },
+        "eligible_at": {"type": ["string", "null"], "format": "date-time"},
+        "eligibility_ref": {"type": ["string", "null"]},
+        "eligibility_evaluated_by": {"type": ["string", "null"]},
+        "deletion_authorization_ref": {"type": ["string", "null"]},
+        "deletion_authorized_by": {"type": ["string", "null"]},
+        "deletion_receipt": {"$ref": "#/$defs/deletion_receipt_or_null"}
+      }
+    },
+    "historical_reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "missing_fields", "limitations", "reconciled_at"],
+      "properties": {
+        "status": {"enum": ["NOT_APPLICABLE", "BOUND", "PARTIALLY_BOUND", "UNBOUND_INSUFFICIENT"]},
+        "missing_fields": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "reconciled_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "binding_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "identity_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "digest"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "identity_ref_or_null": {"anyOf": [{"$ref": "#/$defs/identity_ref"}, {"type": "null"}]},
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "canonicalization", "digest"],
+      "properties": {
+        "ref": {"type": "string", "minLength": 1},
+        "canonicalization": {"const": "json-sorted-utf8-v1"},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "evidence_ref_or_null": {"anyOf": [{"$ref": "#/$defs/evidence_ref"}, {"type": "null"}]},
+    "deletion_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "target_ref", "target_digest", "authorized_by", "authorization_ref", "deleted_at"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "target_ref": {"type": "string", "minLength": 1},
+        "target_digest": {"$ref": "#/$defs/digest"},
+        "authorized_by": {"type": "string", "minLength": 1},
+        "authorization_ref": {"type": "string", "minLength": 1},
+        "deleted_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "deletion_receipt_or_null": {"anyOf": [{"$ref": "#/$defs/deletion_receipt"}, {"type": "null"}]}
+  }
+}

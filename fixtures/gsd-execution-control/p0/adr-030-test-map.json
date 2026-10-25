@@ -1,0 +1,29 @@
+{
+  "fixture_kind": "test-only-adr-030-mandatory-rule-map",
+  "adr": "ADR-030",
+  "source": "docs/adr/ADR-030-gsd-master-execution-control-semantics.md",
+  "status": "G0-mapped-not-implemented",
+  "rules": [
+    {"rule_id": "ADR030-INV-01", "source_anchor": "2. Controller invariants #1", "test_id": "test_adr030_01_execution_binding_identity", "phase": "P1", "status": "planned"},
+    {"rule_id": "ADR030-INV-02", "source_anchor": "2. Controller invariants #2", "test_id": "test_adr030_02_controller_only_state_advancement", "phase": "P1", "status": "planned"},
+    {"rule_id": "ADR030-INV-03", "source_anchor": "2. Controller invariants #3", "test_id": "test_adr030_03_state_change_requires_journal_event", "phase": "P2", "status": "planned"},
+    {"rule_id": "ADR030-INV-04", "source_anchor": "2. Controller invariants #4", "test_id": "test_adr030_04_readiness_and_workspace_admission", "phase": "P3", "status": "planned"},
+    {"rule_id": "ADR030-INV-05", "source_anchor": "2. Controller invariants #5", "test_id": "test_adr030_05_restart_timeout_not_success", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-INV-06", "source_anchor": "2. Controller invariants #6", "test_id": "test_adr030_06_retry_new_attempt_lineage", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-INV-07", "source_anchor": "2. Controller invariants #7", "test_id": "test_adr030_07_terminal_outcome_immutable", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-INV-08", "source_anchor": "2. Controller invariants #8", "test_id": "test_adr030_08_unknown_blocks_duplicate_execution", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-INV-09", "source_anchor": "2. Controller invariants #9", "test_id": "test_adr030_09_execution_not_lifecycle_acceptance", "phase": "P8", "status": "planned"},
+    {"rule_id": "ADR030-INV-10", "source_anchor": "2. Controller invariants #10", "test_id": "test_adr030_10_projection_replay_equivalence", "phase": "P2", "status": "planned"},
+    {"rule_id": "ADR030-JOURNAL-01", "source_anchor": "4.1 Journal authority", "test_id": "test_adr030_11_journal_sequence_and_event_identity", "phase": "P2", "status": "planned"},
+    {"rule_id": "ADR030-JOURNAL-02", "source_anchor": "4.2 Atomicity rules", "test_id": "test_adr030_12_dispatch_intent_reconciliation", "phase": "P2", "status": "planned"},
+    {"rule_id": "ADR030-JOURNAL-03", "source_anchor": "4.3 Ordering and replay", "test_id": "test_adr030_13_replay_fails_closed_on_gap", "phase": "P2", "status": "planned"},
+    {"rule_id": "ADR030-IDEMPOTENCY-01", "source_anchor": "5.1 Operation identity", "test_id": "test_adr030_14_operation_identity_digest", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-IDEMPOTENCY-02", "source_anchor": "5.2 Duplicate rules", "test_id": "test_adr030_15_duplicate_operation_is_idempotent", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-UNKNOWN-01", "source_anchor": "6.1 Unknown classification", "test_id": "test_adr030_16_unknown_is_non_success", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-UNKNOWN-02", "source_anchor": "6.2 Reconciliation", "test_id": "test_adr030_17_reconcile_before_replay", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-UNKNOWN-03", "source_anchor": "6.3 Safe retry authorization", "test_id": "test_adr030_18_retry_requires_safety_policy", "phase": "P4", "status": "planned"},
+    {"rule_id": "ADR030-WORKSPACE-01", "source_anchor": "7.1 Ownership", "test_id": "test_adr030_19_exclusive_workspace_ownership", "phase": "P5", "status": "planned"},
+    {"rule_id": "ADR030-WORKSPACE-02", "source_anchor": "7.2 Lifecycle", "test_id": "test_adr030_20_quarantine_before_cleanup", "phase": "P5", "status": "planned"},
+    {"rule_id": "ADR030-WORKSPACE-03", "source_anchor": "7.3 Evidence preservation", "test_id": "test_adr030_21_workspace_evidence_before_release", "phase": "P5", "status": "planned"}
+  ]
+}

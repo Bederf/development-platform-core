@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "review-cycle.v1",
+  "title": "ReviewCycle v1",
+  "description": "Coordination state for one bounded implementation review cycle. It references existing review, finding, evidence, revision, and verification records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "cycle_id",
+    "task_ref",
+    "revision_ref",
+    "cycle_number",
+    "max_cycles",
+    "prior_cycle_ref",
+    "review_result_ref",
+    "finding_refs",
+    "outcome",
+    "next_action",
+    "next_revision_ref",
+    "verification_ref",
+    "evidence_refs",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "schema": {"const": "review-cycle.v1"},
+    "cycle_id": {"type": "string", "minLength": 1},
+    "task_ref": {"type": "string", "minLength": 1},
+    "revision_ref": {"type": "string", "minLength": 1},
+    "cycle_number": {"type": "integer", "minimum": 1, "maximum": 3},
+    "max_cycles": {"const": 3},
+    "prior_cycle_ref": {"type": ["string", "null"], "minLength": 1},
+    "review_result_ref": {"type": "string", "minLength": 1},
+    "finding_refs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "outcome": {
+      "enum": ["PASS", "CHANGES_REQUIRED", "INCOMPLETE_REVIEW", "BLOCKED", "ESCALATED"]
+    },
+    "next_action": {
+      "enum": ["implement_fix", "re_review", "forge_verify", "complete", "escalate", "stop"]
+    },
+    "independent_review_required": {"type": "boolean"},
+    "next_revision_ref": {"type": ["string", "null"], "minLength": 1},
+    "verification_ref": {"type": ["string", "null"], "minLength": 1},
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "status": {"enum": ["OPEN", "PASSED", "ESCALATED"]},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["independent_review_required"],
+        "properties": {"outcome": {"const": "PASS"}, "independent_review_required": {"const": false}}
+      },
+      "then": {
+        "properties": {
+          "next_action": {"const": "complete"},
+          "status": {"const": "PASSED"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"outcome": {"const": "PASS"}},
+        "not": {"properties": {"independent_review_required": {"const": false}}}
+      },
+      "then": {
+        "properties": {
+          "next_action": {"const": "forge_verify"},
+          "status": {"const": "PASSED"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"outcome": {"const": "CHANGES_REQUIRED"}},
+        "not": {"properties": {"cycle_number": {"const": 3}}}
+      },
+      "then": {
+        "required": ["finding_refs"],
+        "properties": {
+          "finding_refs": {"minItems": 1},
+          "next_action": {"enum": ["implement_fix", "re_review", "escalate", "stop"]},
+          "status": {"const": "OPEN"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cycle_number": {"const": 3},
+          "outcome": {"const": "CHANGES_REQUIRED"}
+        }
+      },
+      "then": {
+        "properties": {
+          "next_action": {"enum": ["escalate", "stop"]},
+          "next_revision_ref": {"type": "null"},
+          "status": {"const": "ESCALATED"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {"enum": ["INCOMPLETE_REVIEW", "BLOCKED", "ESCALATED"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "next_action": {"enum": ["escalate", "stop"]},
+          "status": {"const": "ESCALATED"}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "core-project-phase-specification-binding.v1",
+  "title": "Core Project-Local Phase Specification Binding v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "binding_id", "version", "decision", "issuer", "authority_binding", "scope", "subject", "approval_basis", "digest"],
+  "properties": {
+    "schema": {"const": "core-project-phase-specification-binding.v1"},
+    "binding_id": {"type": "string", "pattern": "^project-[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}-phase-[0-9]{3}-specification-binding$"},
+    "version": {"const": "1.0.0"},
+    "decision": {"const": "approved"},
+    "issuer": {"const": "development-platform-core.phase-authority"},
+    "authority_binding": {"$ref": "#/$defs/ref"},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "project_id", "excluded_authorities"],
+      "properties": {
+        "scope_type": {"const": "project_consumer_phase"},
+        "project_id": {"type": "string", "minLength": 1},
+        "excluded_authorities": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "repository_root", "planning_root", "phase_id", "specification_id", "specification_version", "specification_hash"],
+      "properties": {
+        "project_id": {"type": "string", "minLength": 1},
+        "repository_root": {"type": "string", "minLength": 1},
+        "planning_root": {"type": "string", "minLength": 1},
+        "phase_id": {"type": "string", "pattern": "^P[0-9]{3}$"},
+        "specification_id": {"type": "string", "minLength": 1},
+        "specification_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "specification_hash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      }
+    },
+    "approval_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_path", "record_sha256", "approver", "approver_capacity", "execution_excluded"],
+      "properties": {
+        "record_path": {"type": "string", "minLength": 1},
+        "record_sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "approver": {"type": "string", "minLength": 1},
+        "approver_capacity": {"type": "string", "minLength": 1},
+        "execution_excluded": {"const": true}
+      }
+    },
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": {"const": "authority_binding"},
+        "id": {"const": "core-phase-authority"},
+        "version": {"const": "1.0.0"},
+        "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      }
+    }
+  }
+}

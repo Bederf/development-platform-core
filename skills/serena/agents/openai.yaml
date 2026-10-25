@@ -1,0 +1,4 @@
+interface:
+  display_name: Serena
+  short_description: Navigate and refactor code by symbol relationships
+  default_prompt: Use Serena symbol-aware navigation to inspect definitions and references before cross-file code changes.

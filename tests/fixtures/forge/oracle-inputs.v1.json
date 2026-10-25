@@ -1,0 +1,13 @@
+{
+  "schema": "forge-oracle-inputs.v1",
+  "owner": {
+    "actor_id": "payments-domain-owner",
+    "session_id": "oracle-session-002"
+  },
+  "source": "retained synthetic payment-calculation oracle fixture",
+  "cases": [
+    {"case_id": "ordinary", "amount": "100.00", "rate": "0.15", "expected": "15.00"},
+    {"case_id": "round-half-up", "amount": "10.005", "rate": "1", "expected": "10.01"},
+    {"case_id": "zero", "amount": "0.00", "rate": "0.15", "expected": "0.00"}
+  ]
+}

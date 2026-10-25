@@ -1,0 +1,39 @@
+schema: verified-state-transition-conformance.v1
+description: Provider-neutral graph-level authorize-execute-verify conformance.
+cases:
+  - id: positive-authorize-execute-verify
+    policy: allow
+    execution: completed
+    verification: pass
+    expected_state: VERIFIED
+    expected_recovery: null
+  - id: policy-deny
+    policy: deny
+    execution: not_run
+    verification: unsupported
+    expected_state: UNVERIFIED
+    expected_recovery: policy-denied
+  - id: execution-failure
+    policy: allow
+    execution: failed
+    verification: unsupported
+    expected_state: UNVERIFIED
+    expected_recovery: execution-failure
+  - id: verification-failure
+    policy: allow
+    execution: completed
+    verification: fail
+    expected_state: UNVERIFIED
+    expected_recovery: verification-required
+  - id: verification-unavailable
+    policy: allow
+    execution: completed
+    verification: unavailable
+    expected_state: UNVERIFIED
+    expected_recovery: verification-required
+  - id: finish-success-verification-unsupported
+    policy: allow
+    execution: completed
+    verification: unsupported
+    expected_state: UNVERIFIED
+    expected_recovery: verification-required

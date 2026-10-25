@@ -1,0 +1,31 @@
+{
+  "schema": "capability-definition.v1",
+  "entity_type": "capability_profile",
+  "profile_id": "ocr.deterministic",
+  "version": "1.0.0",
+  "semantic_description": "Require the deterministic review checks of the base review capability without selecting an external review provider.",
+  "base_capability": {
+    "semantic_type": "capability_definition",
+    "id": "ocr",
+    "version": "1.0.0"
+  },
+  "additional_responsibilities": [
+    "Report deterministic checks as the required review result"
+  ],
+  "additional_constraints": [],
+  "input_contracts": [],
+  "output_contracts": [],
+  "conformance_requirements": ["structural", "semantic", "behavioral"],
+  "compatibility_policy": {
+    "semantic_type": "compatibility_policy",
+    "id": "ocr-deterministic-compatibility",
+    "version": "1.0.0"
+  },
+  "issuer": "development-platform-core",
+  "authority_binding": null,
+  "validity_scope": {
+    "scope_type": "platform",
+    "scope_id": "development-platform-core"
+  },
+  "supersession": null
+}

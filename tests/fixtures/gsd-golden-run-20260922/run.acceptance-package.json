@@ -1,0 +1,12 @@
+{
+  "fixture_status": "derived_compatibility_reference",
+  "historical_source_recovered": false,
+  "approved_specification_ref": "specification:GOLDEN-001:v1.0.0",
+  "requirement_evaluations": [
+    {
+      "requirement_id": "G-001",
+      "status": "passed",
+      "evidence_ref": "fixture:test-evidence:G-001"
+    }
+  ]
+}

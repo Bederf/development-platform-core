@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "delegation.v1.candidate",
+  "title": "Governed Delegation v1 Candidate",
+  "description": "Candidate provider-neutral coordination, provenance, and completeness family. Not promoted. It does not authorize, execute, verify, or complete governed work.",
+  "oneOf": [
+    { "$ref": "#/$defs/delegation_set" },
+    { "$ref": "#/$defs/delegation_child" },
+    { "$ref": "#/$defs/aggregation" }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": { "$ref": "#/$defs/id" },
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "digest": { "$ref": "#/$defs/digest" },
+        "scope_ref": { "$ref": "#/$defs/ref_id" }
+      }
+    },
+    "ref_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id"],
+      "properties": {
+        "scope_type": { "$ref": "#/$defs/id" },
+        "scope_id": { "$ref": "#/$defs/id" },
+        "project_ref": { "$ref": "#/$defs/ref" },
+        "session_ref": { "$ref": "#/$defs/ref" }
+      }
+    },
+    "execution_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": { "const": "agent_execution" },
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "digest": { "$ref": "#/$defs/digest" },
+        "attempt_id": { "$ref": "#/$defs/ref_id" }
+      }
+    },
+    "child_status": {
+      "type": "string",
+      "enum": ["DECLARED", "RUNNING", "SUCCEEDED", "VERIFIED", "FAILED", "PARTIAL", "TIMED_OUT", "CANCELLED", "UNKNOWN", "BLOCKED"]
+    },
+    "set_status": {
+      "type": "string",
+      "enum": ["OPEN", "COMPLETE", "PARTIAL", "BLOCKED", "UNKNOWN"]
+    },
+    "aggregation_status": {
+      "type": "string",
+      "enum": ["COMPLETE", "PARTIAL", "BLOCKED", "UNKNOWN", "CONTRADICTORY"]
+    },
+    "child_id_set": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/ref_id" }
+    },
+    "set_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": { "const": "delegation_set" },
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "child_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": { "const": "delegation_child" },
+        "id": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "status_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["child_id", "status"],
+      "properties": {
+        "child_id": { "$ref": "#/$defs/ref_id" },
+        "status": { "$ref": "#/$defs/child_status" },
+        "reason_ref": { "$ref": "#/$defs/ref" }
+      }
+    },
+    "common": {
+      "type": "object",
+      "required": ["schema", "entity_type", "entity_id", "version", "delegation_id", "revision", "scope", "lineage", "digest", "created_at"],
+      "properties": {
+        "schema": { "const": "delegation.v1" },
+        "entity_type": { "enum": ["delegation_set", "delegation_child", "aggregation"] },
+        "entity_id": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/version" },
+        "delegation_id": { "$ref": "#/$defs/id" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "scope": { "$ref": "#/$defs/scope" },
+        "lineage": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/ref" } },
+        "digest": { "$ref": "#/$defs/digest" },
+        "created_at": { "$ref": "#/$defs/time" }
+      }
+    },
+    "delegation_set": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "required": ["entity_type", "parent_task_ref", "objective_ref", "objective_digest", "authority_scope_ref", "required_capability_refs", "budget_ref", "deadline", "parent_execution_ref", "expected_children", "expected_set_digest", "status"],
+          "properties": {
+            "entity_type": { "const": "delegation_set" },
+            "parent_task_ref": { "$ref": "#/$defs/ref" },
+            "objective_ref": { "$ref": "#/$defs/ref" },
+            "objective_digest": { "$ref": "#/$defs/digest" },
+            "authority_scope_ref": { "$ref": "#/$defs/ref" },
+            "required_capability_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/ref" } },
+            "budget_ref": { "$ref": "#/$defs/ref" },
+            "deadline": { "$ref": "#/$defs/time" },
+            "parent_execution_ref": { "$ref": "#/$defs/execution_ref" },
+            "expected_children": { "$ref": "#/$defs/child_id_set" },
+            "expected_set_digest": { "$ref": "#/$defs/digest" },
+            "aggregation_profile_ref": { "$ref": "#/$defs/ref" },
+            "status": { "$ref": "#/$defs/set_status" }
+          },
+          "x-invariants": [
+            "expected_children is immutable within a revision",
+            "objective_digest binds the exact delegated objective",
+            "authority_scope_ref and required_capability_refs describe requirements and never grant authorization",
+            "budget_ref and deadline bound the delegation request and do not grant execution authority",
+            "every delegation_child.delegation_id references this delegation_id and revision",
+            "status COMPLETE is permitted only after aggregation eligibility passes",
+            "status is descriptive and never means policy allow, execution, Forge PASS, or platform DONE"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "delegation_child": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "required": ["entity_type", "child_id", "expected_role", "parent_ref", "instruction_ref", "instruction_digest", "context_ref", "context_digest", "status"],
+          "properties": {
+            "entity_type": { "const": "delegation_child" },
+            "child_id": { "$ref": "#/$defs/ref_id" },
+            "expected_role": { "$ref": "#/$defs/id" },
+            "parent_ref": { "$ref": "#/$defs/set_ref" },
+            "instruction_ref": { "$ref": "#/$defs/ref" },
+            "instruction_digest": { "$ref": "#/$defs/digest" },
+            "context_ref": { "$ref": "#/$defs/ref" },
+            "context_digest": { "$ref": "#/$defs/digest" },
+            "child_execution_ref": { "$ref": "#/$defs/execution_ref" },
+            "provider_observation_ref": { "$ref": "#/$defs/ref" },
+            "result_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/ref" } },
+            "status": { "$ref": "#/$defs/child_status" },
+            "previous_attempt_ref": { "$ref": "#/$defs/execution_ref" },
+            "failure_ref": { "$ref": "#/$defs/ref" }
+          },
+          "x-invariants": [
+            "child_id is unique within delegation_id and revision",
+            "instruction_digest and context_digest bind the exact child inputs",
+            "TIMED_OUT is distinct from FAILED, CANCELLED, UNKNOWN, and SUCCEEDED",
+            "changed instruction or context requires a new revision or identity boundary",
+            "retry creates a new child execution/attempt and preserves prior evidence",
+            "provider/model metadata is opaque and cannot grant authority",
+            "terminal status without result_refs is not sufficient for aggregate completion"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "aggregation": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "required": ["entity_type", "parent_ref", "expected_child_refs", "observed_child_refs", "included_child_refs", "aggregation_status"],
+          "properties": {
+            "entity_type": { "const": "aggregation" },
+            "parent_ref": { "$ref": "#/$defs/set_ref" },
+            "expected_child_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/child_ref" } },
+            "observed_child_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/child_ref" } },
+            "included_child_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/child_ref" } },
+            "missing_children": { "$ref": "#/$defs/child_id_set" },
+            "extra_children": { "$ref": "#/$defs/child_id_set" },
+            "unknown_children": { "$ref": "#/$defs/child_id_set" },
+            "partial_children": { "$ref": "#/$defs/child_id_set" },
+            "failed_children": { "$ref": "#/$defs/child_id_set" },
+            "timed_out_children": { "$ref": "#/$defs/child_id_set" },
+            "cancelled_children": { "$ref": "#/$defs/child_id_set" },
+            "synthesis_ref": { "$ref": "#/$defs/ref" },
+            "evaluation_ref": { "$ref": "#/$defs/ref" },
+            "aggregation_status": { "$ref": "#/$defs/aggregation_status" },
+            "aggregation_method_ref": { "$ref": "#/$defs/ref" },
+            "conditions": { "type": "array", "items": { "$ref": "#/$defs/status_condition" } }
+          },
+          "x-invariants": [
+            "expected, observed, and included child sets are semantically distinct",
+            "included_child_refs is a subset of observed_child_refs",
+            "observed_child_refs is a subset of expected_child_refs unless extra_children explicitly records the violation",
+            "missing, unknown, partial, failed, timed-out, or cancelled expected children prevent aggregation_status COMPLETE",
+            "contradictory outputs require evaluation_ref or an unresolved CONTRADICTORY status",
+            "aggregation is a non-authoritative observation/proposal and never an authorization or execution result",
+            "aggregation COMPLETE never implies GSD COMPLETE, policy ALLOW, Herdr execution, Forge PASS, or platform DONE"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  },
+  "x-status": "candidate-only",
+  "x-promotion-requirements": [
+    "strict fake-provider conformance against all hostile cases",
+    "formal review of cross-record invariants not expressible in JSON Schema",
+    "compatibility review with existing Core contracts",
+    "independent approval before promotion"
+  ]
+}

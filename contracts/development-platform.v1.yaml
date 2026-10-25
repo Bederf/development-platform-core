@@ -1,0 +1,58 @@
+schema: development-platform.v1
+
+project:
+  id: example-project
+  root: .
+  knowledge_root: vault/
+  planning_root: vault/00-GSD-Phases/
+
+repository_intelligence:
+  enabled: true
+  provider: code-review-graph
+  freshness_policy: bounded
+  degraded_mode: startup-without-trusted-context
+
+agents:
+  claude: true
+  codex: true
+  opencode: true
+
+gsd:
+  enabled: true
+  session_governance: gsd-session-governance.v1
+  planning_root: vault/00-GSD-Phases/
+  task_authority: vault/99-Tasks/TODO.md
+
+session_brief:
+  # Additive, Phase 009. Absent/false means the adapter reports
+  # session_brief.status: "unavailable" without invoking a provider.
+  enabled: false
+  # Additive, Phase 010. Paths relative to knowledge_root. No filename is
+  # assumed by the platform provider — each project declares its own list.
+  source_documents: []
+  # Additive, Phase 010. Relative to knowledge_root. Optional; defaults to
+  # "session-brief.md" if omitted.
+  output_path: session-brief.md
+
+runtime_history:
+  # Additive, Phase 009. Absent/false means the adapter reports
+  # runtime_history.status: "unavailable" without invoking a provider.
+  enabled: false
+  # Additive. Relative to repository root. Optional; projects without a
+  # runtime history store report "unavailable".
+  database_path: .runtime/store.db
+
+forge:
+  enabled: true
+  verification: project-defined
+  manifest: .forge/manifest.yaml
+
+herdr:
+  enabled: true
+  lifecycle_transport: true
+
+runtime:
+  enabled: false
+
+batch:
+  enabled: false

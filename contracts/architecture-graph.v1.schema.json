@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "architecture-graph.v1",
+  "title": "Architecture Graph v1",
+  "description": "Consumer-neutral semantic architecture topology with source provenance. It contains no renderer-controlled layout.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "graph_id", "graph_version", "project_id", "title", "status", "source", "generated_at", "nodes", "edges", "limitations", "digest"],
+  "properties": {
+    "schema": {"const": "architecture-graph.v1"},
+    "graph_id": {"$ref": "#/$defs/id"},
+    "graph_version": {"$ref": "#/$defs/version"},
+    "project_id": {"$ref": "#/$defs/id"},
+    "title": {"type": "string", "minLength": 1},
+    "purpose": {"type": ["string", "null"]},
+    "status": {"enum": ["draft", "validated", "degraded", "unavailable"]},
+    "source": {"$ref": "#/$defs/source"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "nodes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/edge"}},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "revision", "references"],
+      "properties": {
+        "kind": {"enum": ["repository", "document_set", "canvas", "generated"]},
+        "revision": {"type": ["string", "null"]},
+        "references": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source_ref"}}
+      }
+    },
+    "source_ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "revision"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "revision": {"type": ["string", "null"]},
+        "line_start": {"type": ["integer", "null"], "minimum": 1},
+        "line_end": {"type": ["integer", "null"], "minimum": 1},
+        "anchor": {"type": ["string", "null"]},
+        "digest": {"oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]}
+      }
+    },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "label", "status", "source_refs"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["system", "component", "service", "module", "agent", "data_store", "interface", "process", "control", "document", "external", "group", "other"]},
+        "label": {"type": "string", "minLength": 1},
+        "description": {"type": ["string", "null"]},
+        "status": {"enum": ["proposed", "defined", "deprecated", "unknown"]},
+        "source_refs": {"type": "array", "items": {"$ref": "#/$defs/source_ref"}},
+        "attributes": {"type": "object"}
+      }
+    },
+    "edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "from", "to", "relationship", "source_refs"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "from": {"$ref": "#/$defs/id"},
+        "to": {"$ref": "#/$defs/id"},
+        "relationship": {"type": "string", "minLength": 1},
+        "label": {"type": ["string", "null"]},
+        "source_refs": {"type": "array", "items": {"$ref": "#/$defs/source_ref"}},
+        "attributes": {"type": "object"}
+      }
+    }
+  }
+}

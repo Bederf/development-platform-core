@@ -1,0 +1,81 @@
+{
+  "schema": "temporal-memory-replay.v1",
+  "status": "exploratory",
+  "project_id": "synthetic-project",
+  "episodes": [
+    {
+      "episode_id": "episode-a",
+      "occurred_at": "2026-01-10T09:00:00Z",
+      "ingested_at": "2026-01-10T09:05:00Z",
+      "source_ref": "episode:episode-a",
+      "content": "Database selected: PostgreSQL.",
+      "authority_class": "informational"
+    },
+    {
+      "episode_id": "episode-b",
+      "occurred_at": "2026-03-15T11:00:00Z",
+      "ingested_at": "2026-03-15T11:05:00Z",
+      "source_ref": "episode:episode-b",
+      "content": "Database migration completed. The application now connects to SQLite.",
+      "authority_class": "informational"
+    },
+    {
+      "episode_id": "episode-c",
+      "occurred_at": "2026-05-20T14:00:00Z",
+      "ingested_at": "2026-05-20T14:05:00Z",
+      "source_ref": "episode:episode-c",
+      "content": "Production deployment uses PostgreSQL. The SQLite deployment was not retained.",
+      "authority_class": "informational"
+    },
+    {
+      "episode_id": "episode-unrelated",
+      "occurred_at": "2026-05-20T15:00:00Z",
+      "ingested_at": "2026-05-20T15:05:00Z",
+      "source_ref": "episode:episode-unrelated",
+      "content": "The cache provider changed from in-memory caching to Redis.",
+      "authority_class": "informational"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "initial-selection",
+      "query": "What database was selected initially?",
+      "as_of": "2026-01-31T00:00:00Z",
+      "expected_source_refs": ["episode:episode-a"],
+      "expected_current_refs": ["episode:episode-a"],
+      "forbidden_current_refs": ["episode:episode-b", "episode:episode-c"]
+    },
+    {
+      "case_id": "migration-state",
+      "query": "What database was active on 2026-04-01?",
+      "as_of": "2026-04-01T00:00:00Z",
+      "expected_source_refs": ["episode:episode-b"],
+      "expected_current_refs": ["episode:episode-b"],
+      "forbidden_current_refs": ["episode:episode-a", "episode:episode-c"]
+    },
+    {
+      "case_id": "current-state",
+      "query": "What is the current production database?",
+      "as_of": "2026-06-01T00:00:00Z",
+      "expected_source_refs": ["episode:episode-c"],
+      "expected_current_refs": ["episode:episode-c"],
+      "forbidden_current_refs": ["episode:episode-a", "episode:episode-b"]
+    },
+    {
+      "case_id": "historical-transition",
+      "query": "What changed between the initial selection and the current production state?",
+      "as_of": "2026-06-01T00:00:00Z",
+      "expected_source_refs": ["episode:episode-a", "episode:episode-b", "episode:episode-c"],
+      "expected_current_refs": ["episode:episode-c"],
+      "forbidden_current_refs": ["episode:episode-a", "episode:episode-b"]
+    },
+    {
+      "case_id": "unrelated-change",
+      "query": "What changed about the cache provider?",
+      "as_of": "2026-06-01T00:00:00Z",
+      "expected_source_refs": ["episode:episode-unrelated"],
+      "expected_current_refs": ["episode:episode-unrelated"],
+      "forbidden_current_refs": []
+    }
+  ]
+}

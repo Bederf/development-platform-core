@@ -1,0 +1,4 @@
+interface:
+  display_name: Chrome DevTools
+  short_description: Inspect and verify web applications in-browser
+  default_prompt: Use Chrome DevTools to inspect the relevant page, console, network, and performance behavior.

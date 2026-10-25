@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-authority-projection.v1",
+  "title": "Contract Authority Projection v1",
+  "description": "Derived, provider-neutral facts produced by validating contract authority sources. This projection is not itself an authority declaration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "record_type",
+    "projection_id",
+    "contract",
+    "authority",
+    "status_dimensions",
+    "evidence",
+    "reconciliation",
+    "admissibility",
+    "provenance"
+  ],
+  "properties": {
+    "schema": {"const": "contract-authority-projection.v1"},
+    "record_type": {"const": "contract_authority_projection"},
+    "projection_id": {"$ref": "#/$defs/identifier"},
+    "contract": {"$ref": "#/$defs/contract_identity"},
+    "authority": {"$ref": "#/$defs/authority"},
+    "status_dimensions": {"$ref": "#/$defs/status_dimensions"},
+    "evidence": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/evidence_reference"}
+    },
+    "reconciliation": {"$ref": "#/$defs/reconciliation"},
+    "admissibility": {"$ref": "#/$defs/admissibility"},
+    "provenance": {"$ref": "#/$defs/provenance"}
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "digest": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z][A-Za-z0-9._-]*:[A-Za-z0-9+/=_-]+$"
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": {"$ref": "#/$defs/identifier"},
+        "id": {"$ref": "#/$defs/identifier"},
+        "version": {"$ref": "#/$defs/version"},
+        "digest": {"$ref": "#/$defs/digest"},
+        "issuer": {"type": "string", "minLength": 1}
+      }
+    },
+    "nullable_reference": {
+      "oneOf": [
+        {"$ref": "#/$defs/reference"},
+        {"type": "null"}
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id"],
+      "properties": {
+        "scope_type": {"$ref": "#/$defs/identifier"},
+        "scope_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "contract_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "version", "schema_id", "schema_digest", "issuer"],
+      "properties": {
+        "family": {"$ref": "#/$defs/identifier"},
+        "version": {"$ref": "#/$defs/version"},
+        "schema_id": {"$ref": "#/$defs/identifier"},
+        "schema_digest": {"$ref": "#/$defs/digest"},
+        "issuer": {"type": "string", "minLength": 1}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "disposition",
+        "promotion_decision_ref",
+        "authority_binding_ref",
+        "validity_scope"
+      ],
+      "properties": {
+        "disposition": {
+          "enum": ["candidate", "promoted", "deprecated", "withdrawn", "superseded"]
+        },
+        "promotion_decision_ref": {"$ref": "#/$defs/nullable_reference"},
+        "authority_binding_ref": {"$ref": "#/$defs/nullable_reference"},
+        "historical_identity_exception_ref": {"$ref": "#/$defs/nullable_reference"},
+        "validity_scope": {"$ref": "#/$defs/nullable_scope"}
+      }
+    },
+    "nullable_scope": {
+      "oneOf": [
+        {"$ref": "#/$defs/scope"},
+        {"type": "null"}
+      ]
+    },
+    "status_dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "conformance",
+        "qualification",
+        "lifecycle",
+        "baseline"
+      ],
+      "properties": {
+        "implementation": {"$ref": "#/$defs/implementation_status"},
+        "conformance": {"$ref": "#/$defs/conformance_status"},
+        "qualification": {"$ref": "#/$defs/qualification_status"},
+        "lifecycle": {"$ref": "#/$defs/lifecycle_status"},
+        "baseline": {"$ref": "#/$defs/baseline_status"}
+      }
+    },
+    "dimension_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence_refs"],
+      "properties": {
+        "status": {"type": "string", "minLength": 1},
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reference"}
+        },
+        "subject_ref": {"$ref": "#/$defs/nullable_reference"},
+        "detail": {"type": "string", "minLength": 1}
+      }
+    },
+    "implementation_status": {
+      "allOf": [
+        {"$ref": "#/$defs/dimension_status"},
+        {
+          "properties": {
+            "status": {"enum": ["absent", "reference_only", "available", "production", "unknown"]}
+          }
+        }
+      ]
+    },
+    "conformance_status": {
+      "allOf": [
+        {"$ref": "#/$defs/dimension_status"},
+        {
+          "properties": {
+            "status": {"enum": ["not_assessed", "candidate", "conformant", "non_conformant", "unknown"]}
+          }
+        }
+      ]
+    },
+    "qualification_status": {
+      "allOf": [
+        {"$ref": "#/$defs/dimension_status"},
+        {
+          "properties": {
+            "status": {"enum": ["not_assessed", "reference_only", "qualified", "failed", "expired", "unknown"]}
+          }
+        }
+      ]
+    },
+    "lifecycle_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "supersession_ref", "deprecation_ref"],
+      "properties": {
+        "status": {"enum": ["active", "deprecated", "withdrawn", "superseded", "unknown"]},
+        "supersession_ref": {"$ref": "#/$defs/nullable_reference"},
+        "deprecation_ref": {"$ref": "#/$defs/nullable_reference"}
+      }
+    },
+    "baseline_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["freeze_status", "evidence_refs"],
+      "properties": {
+        "freeze_status": {"enum": ["in_baseline", "not_in_baseline", "unknown"]},
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reference"}
+        },
+        "baseline_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_type", "reference", "supports_dimension"],
+      "properties": {
+        "evidence_type": {"$ref": "#/$defs/identifier"},
+        "reference": {"$ref": "#/$defs/reference"},
+        "supports_dimension": {
+          "enum": ["authority", "implementation", "conformance", "qualification", "lifecycle", "baseline"]
+        },
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "reason_codes", "blocking"],
+      "properties": {
+        "outcome": {"enum": ["VALID", "INVALID", "CONTRADICTORY", "UNRESOLVED"]},
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reason_code"}
+        },
+        "blocking": {"type": "boolean"},
+        "findings": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/finding"}
+        }
+      }
+    },
+    "reason_code": {
+      "enum": [
+        "SCHEMA_INVALID",
+        "IDENTITY_MISMATCH",
+        "VERSION_MISMATCH",
+        "DIGEST_MISMATCH",
+        "MISSING_AUTHORITY_DECISION",
+        "MULTIPLE_AUTHORITY_DECISIONS",
+        "AUTHORITY_BINDING_INVALID",
+        "EVIDENCE_MISSING",
+        "EVIDENCE_UNAVAILABLE",
+        "EVIDENCE_DIGEST_INVALID",
+        "SOURCE_NOT_REPRODUCIBLE",
+        "UNTRACKED_AUTHORITY_SOURCE",
+        "PATH_ID_MISMATCH",
+        "CANDIDATE_PROMOTION_CONFLICT",
+        "FREEZE_SCOPE_CONFLICT",
+        "SUPERSESSION_CONFLICT",
+        "DEPRECATION_CONFLICT",
+        "DOCUMENTATION_DRIFT",
+        "STATUS_UNSUPPORTED",
+        "HISTORICAL_IDENTITY_EXCEPTION_APPLIED",
+        "HISTORICAL_EXCEPTION_MISSING",
+        "HISTORICAL_EXCEPTION_INVALID",
+        "HISTORICAL_EXCEPTION_UNTRACKED",
+        "HISTORICAL_EXCEPTION_DIGEST_INVALID",
+        "HISTORICAL_EXCEPTION_REVISION_INVALID",
+        "HISTORICAL_EXCEPTION_SCOPE_INVALID",
+        "HISTORICAL_EXCEPTION_CONFLICT",
+        "HISTORICAL_EXCEPTION_EXPIRED",
+        "HISTORICAL_EXCEPTION_REVOKED",
+        "HISTORICAL_EXCEPTION_NON_TRANSFERABLE",
+        "SOURCE_REVISION_BINDING_INVALID"
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason_code", "dimension", "blocking"],
+      "properties": {
+        "reason_code": {"$ref": "#/$defs/reason_code"},
+        "dimension": {"enum": ["identity", "authority", "implementation", "conformance", "qualification", "lifecycle", "baseline", "provenance"]},
+        "source_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reference"}
+        },
+        "detail": {"type": "string", "minLength": 1},
+        "blocking": {"type": "boolean"}
+      }
+    },
+    "admissibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_authoritative", "contract_use", "blocked_reasons"],
+      "properties": {
+        "contract_authoritative": {"type": "boolean"},
+        "contract_use": {"enum": ["semantic_reference", "compatibility_reference", "binding_input", "runtime_input"]},
+        "blocked_reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reason_code"}
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_revision", "source_digests", "reproducibility", "projection_digest"],
+      "properties": {
+        "source_revision": {"type": "string", "minLength": 1},
+        "source_digests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/digest"}
+        },
+        "reproducibility": {"$ref": "#/$defs/reproducibility"},
+        "projection_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["reproducible", "non_reproducible"]},
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reason_code"}
+        }
+      }
+    }
+  }
+}

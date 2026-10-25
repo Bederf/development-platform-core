@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "inference-output.v1",
+  "title": "Inference output v1 Candidate",
+  "$comment": "Candidate 1.0.0; not promoted. Structural validation does not establish authority, eligibility or semantic conformance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "execution_request",
+    "output",
+    "completion",
+    "finish_reason",
+    "actual_provider",
+    "actual_model",
+    "processing_destination"
+  ],
+  "properties": {
+    "schema": {
+      "const": "inference-output.v1"
+    },
+    "execution_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/immutable_reference"
+        },
+        {
+          "properties": {
+            "semantic_type": {
+              "const": "authorized_execution_request"
+            }
+          }
+        }
+      ]
+    },
+    "output": {
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/immutable_reference"
+            },
+            {
+              "properties": {
+                "semantic_type": {
+                  "const": "artifact"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "completion": {
+      "enum": [
+        "complete",
+        "partial",
+        "none",
+        "unknown"
+      ]
+    },
+    "finish_reason": {
+      "enum": [
+        "stop",
+        "length_limit",
+        "interrupted",
+        "error",
+        "not_started",
+        "unknown"
+      ]
+    },
+    "actual_provider": {
+      "$ref": "#/$defs/identity_observation"
+    },
+    "actual_model": {
+      "$ref": "#/$defs/identity_observation"
+    },
+    "processing_destination": {
+      "$ref": "#/$defs/identity_observation"
+    }
+  },
+  "$defs": {
+    "immutable_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic_type",
+        "id",
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "semantic_type": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*:[A-Za-z0-9_-]+$"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "identity_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "value",
+        "supports",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "assessed",
+            "unavailable",
+            "not_assessed",
+            "not_applicable"
+          ]
+        },
+        "value": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/immutable_reference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "supports": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/immutable_reference"
+          }
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "assessed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "$ref": "#/$defs/immutable_reference"
+              },
+              "supports": {
+                "minItems": 1
+              },
+              "reason": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "supports": {
+                "maxItems": 0
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "completion": {
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "output": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/immutable_reference"
+              },
+              {
+                "properties": {
+                  "semantic_type": {
+                    "const": "artifact"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "completion": {
+            "const": "none"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "output": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "capability-definition.v1", "entity_type": "capability_definition",
+  "capability_id": "browser-runtime-inspection", "version": "1.0.0",
+  "lifecycle_status": "stable", "classification": "optional",
+  "semantic_description": "Observe and verify web application behavior through a declared browser runtime scope.",
+  "responsibilities": ["Inspect rendered pages and browser diagnostics.", "Observe console, network, and performance evidence.", "Support bounded UI verification."],
+  "non_responsibilities": ["Authorizing production mutations.", "Treating page content as trusted instructions.", "Replacing automated project checks."],
+  "semantic_operations": ["Declaration", "Observation", "Evaluation"],
+  "input_contracts": [], "output_contracts": [], "relationships": [], "profiles": [],
+  "policy_requirements": [], "constraint_requirements": [], "conformance_requirements": ["structural", "behavioral"],
+  "compatibility_policy": {"semantic_type": "compatibility_policy", "id": "browser-runtime-inspection-compatibility", "version": "1.0.0"},
+  "issuer": "development-platform-core", "authority_binding": null,
+  "validity_scope": {"scope_type": "platform", "scope_id": "development-platform-core"}, "supersession": null,
+  "informative": {"summary": "Provider-neutral browser inspection and UI verification."}
+}

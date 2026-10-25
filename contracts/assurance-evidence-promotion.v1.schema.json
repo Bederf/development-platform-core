@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "assurance-evidence-promotion.v1",
+  "title": "Assurance Evidence Promotion v1",
+  "description": "Provider-neutral lifecycle envelope for bounded assurance evidence. It records disposition and references existing authority; it is not itself an authority decision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "record_type",
+    "promotion_id",
+    "evidence_ref",
+    "subject_ref",
+    "validity_scope",
+    "supports",
+    "review_refs",
+    "acceptance_refs",
+    "authority_decision_ref",
+    "source_revision",
+    "disposition",
+    "supersedes_ref",
+    "reason_codes",
+    "provenance"
+  ],
+  "properties": {
+    "schema": {"const": "assurance-evidence-promotion.v1"},
+    "record_type": {"const": "assurance_evidence_promotion"},
+    "promotion_id": {"$ref": "#/$defs/id"},
+    "evidence_ref": {"$ref": "#/$defs/immutable_ref"},
+    "subject_ref": {"$ref": "#/$defs/immutable_ref"},
+    "validity_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id"],
+      "properties": {
+        "scope_type": {"$ref": "#/$defs/id"},
+        "scope_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "supports": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "review_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/immutable_ref"}},
+    "acceptance_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/immutable_ref"}},
+    "authority_decision_ref": {"oneOf": [{"$ref": "#/$defs/immutable_ref"}, {"type": "null"}]},
+    "source_revision": {"type": "string", "minLength": 1},
+    "disposition": {"enum": ["candidate", "promoted", "superseded", "orphaned", "invalid", "unresolved"]},
+    "supersedes_ref": {"oneOf": [{"$ref": "#/$defs/immutable_ref"}, {"type": "null"}]},
+    "reason_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/reason_code"}},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_digests", "reproducibility"],
+      "properties": {
+        "source_digests": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/digest"}},
+        "reproducibility": {"enum": ["reproducible", "non_reproducible", "unknown"]}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"disposition": {"const": "promoted"}}, "required": ["disposition"]},
+      "then": {
+        "properties": {
+          "review_refs": {"minItems": 1},
+          "acceptance_refs": {"minItems": 1},
+          "authority_decision_ref": {"type": "object"},
+          "reason_codes": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"disposition": {"const": "superseded"}}, "required": ["disposition"]},
+      "then": {"properties": {"supersedes_ref": {"type": "object"}}}
+    },
+    {
+      "if": {"properties": {"disposition": {"enum": ["invalid", "unresolved", "orphaned"]}}, "required": ["disposition"]},
+      "then": {"properties": {"reason_codes": {"minItems": 1}}}
+    }
+  ],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._:-]*$"},
+    "reason_code": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$"},
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "immutable_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_type", "id", "version", "digest"],
+      "properties": {
+        "semantic_type": {"$ref": "#/$defs/id"},
+        "id": {"$ref": "#/$defs/id"},
+        "version": {"type": "string", "minLength": 1},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

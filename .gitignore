@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+.runtime/
+.forge/session.json
+.forge/*.log
+.gsd-engine/sessions/
+.gsd-engine/reviews/
+*.log
+# Local OpenSandbox checkout and runtime state
+/opensandbox/
+
+# Obsidian project vault: keep shared minimal configuration, ignore local UI state.
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/plugins/
+.obsidian/themes/

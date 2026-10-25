@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-runtime.v1",
+  "title": "AgentRuntime v1",
+  "description": "Provider-neutral request and result envelope for an agent runtime. The runtime reports facts but cannot redefine platform authority or Forge verification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "message_type", "operation", "request_id", "execution"],
+  "properties": {
+    "schema": {"const": "agent-runtime.v1"},
+    "message_type": {"enum": ["request", "result"]},
+    "operation": {"enum": ["start", "execute", "select_model", "observe_events", "collect_artifacts", "cancel", "retry"]},
+    "request_id": {"type": "string", "minLength": 1},
+    "in_reply_to": {"type": "string", "minLength": 1},
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["control_plane_id", "work_item_id", "run_id", "execution_id", "attempt_id"],
+      "properties": {
+        "control_plane_id": {"type": "string", "minLength": 1},
+        "work_item_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "execution_id": {"type": "string", "minLength": 1},
+        "attempt_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "startup_context": {"$ref": "agent-startup-context.v1.schema.json"},
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objective"],
+      "properties": {
+        "objective": {"type": "string", "minLength": 1},
+        "parameters": {"type": "object"}
+      }
+    },
+    "model": {"$ref": "#/$defs/model"},
+    "previous_attempt_id": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACCEPTED", "RUNNING", "SUCCEEDED", "FAILED", "CANCEL_REQUESTED", "CANCELLED", "BLOCKED", "REJECTED"]},
+    "provider_session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "session_id"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "session_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "selected_model": {"$ref": "#/$defs/model"},
+    "cancellation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requested", "completed", "reason"],
+      "properties": {
+        "requested": {"const": true},
+        "completed": {"type": "boolean"},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_attempt_id", "new_attempt_id"],
+      "properties": {
+        "parent_attempt_id": {"type": "string", "minLength": 1},
+        "new_attempt_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "event_type", "sequence", "occurred_at"],
+        "properties": {
+          "event_id": {"type": "string", "minLength": 1},
+          "event_type": {"type": "string", "minLength": 1},
+          "sequence": {"type": "integer", "minimum": 0},
+          "occurred_at": {"type": "string", "minLength": 1},
+          "payload": {"type": "object"}
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_id", "kind", "uri", "producer", "publication"],
+        "properties": {
+          "artifact_id": {"type": "string", "minLength": 1},
+          "kind": {"type": "string", "minLength": 1},
+          "uri": {"type": "string", "minLength": 1},
+          "digest": {"type": ["string", "null"]},
+          "producer": {"type": "string", "minLength": 1},
+          "publication": {"enum": ["PRODUCED", "PUBLISHED"]}
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1},
+        "retryable": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"message_type": {"const": "request"}}, "required": ["message_type"]},
+      "then": {"not": {"required": ["status"]}, "properties": {"in_reply_to": false}},
+      "else": {"required": ["in_reply_to", "status"]}
+    },
+    {"if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "start"}}, "required": ["message_type", "operation"]}, "then": {"required": ["startup_context"]}},
+    {"if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "execute"}}, "required": ["message_type", "operation"]}, "then": {"required": ["task"]}},
+    {"if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "select_model"}}, "required": ["message_type", "operation"]}, "then": {"required": ["model"]}},
+    {"if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "cancel"}}, "required": ["message_type", "operation"]}, "then": {"required": ["reason"]}},
+    {"if": {"properties": {"message_type": {"const": "request"}, "operation": {"const": "retry"}}, "required": ["message_type", "operation"]}, "then": {"required": ["previous_attempt_id"]}},
+    {"if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "select_model"}}, "required": ["message_type", "operation"]}, "then": {"required": ["selected_model"]}},
+    {"if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "execute"}}, "required": ["message_type", "operation"]}, "then": {"required": ["selected_model"]}},
+    {"if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "cancel"}}, "required": ["message_type", "operation"]}, "then": {"required": ["cancellation"]}},
+    {"if": {"properties": {"message_type": {"const": "result"}, "operation": {"const": "retry"}}, "required": ["message_type", "operation"]}, "then": {"required": ["retry"]}},
+    {"if": {"properties": {"message_type": {"const": "result"}, "status": {"enum": ["FAILED", "BLOCKED", "REJECTED"]}}, "required": ["message_type", "status"]}, "then": {"required": ["error"]}}
+  ]
+}

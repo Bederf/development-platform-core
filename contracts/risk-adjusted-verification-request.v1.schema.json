@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "risk-adjusted-verification-request.v1",
+  "title": "Risk-Adjusted Verification Request v1",
+  "description": "Typed Core-owned composition of GSD risk factors, governance controls, and provider verification requirements. It does not grant acceptance authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "phase_id",
+    "work_id",
+    "request_id",
+    "verification_attempt_id",
+    "repository",
+    "baseline",
+    "execution_profile",
+    "risk_factors",
+    "governance_profile_ref",
+    "required_controls",
+    "required_checks",
+    "independent_review_required",
+    "required_artifacts",
+    "authority_ref",
+    "verification_operation",
+    "independence"
+  ],
+  "properties": {
+    "schema": {"const": "risk-adjusted-verification-request.v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "phase_id": {"type": "string", "minLength": 1},
+    "work_id": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "verification_attempt_id": {"type": "string", "minLength": 1},
+    "repository": {"type": "string", "minLength": 1},
+    "baseline": {"type": "string", "minLength": 1},
+    "execution_profile": {"enum": ["small", "medium", "large"]},
+    "risk_factors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "blast_radius", "risk", "dependencies", "architecture_impact"],
+      "properties": {
+        "scope": {"enum": ["low", "medium", "high"]},
+        "blast_radius": {"enum": ["low", "medium", "high"]},
+        "risk": {"enum": ["low", "medium", "high"]},
+        "dependencies": {"enum": ["low", "medium", "high"]},
+        "architecture_impact": {"enum": ["low", "medium", "high"]}
+      }
+    },
+    "governance_profile_ref": {"type": "string", "minLength": 1},
+    "required_controls": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "required_checks": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "independent_review_required": {"type": "boolean"},
+    "required_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "authority_ref": {"type": "string", "minLength": 1},
+    "verification_operation": {"const": "finish"},
+    "independence": {"const": "forge-provider"}
+  }
+}

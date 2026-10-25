@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repository-intelligence.v1",
+  "title": "RepositoryIntelligence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "provider", "generated_at", "indexed_revision", "trusted"],
+  "properties": {
+    "schema": {"const": "repository-intelligence.v1"},
+    "status": {"enum": ["CURRENT", "REFRESHED", "DEGRADED", "UNAVAILABLE"]},
+    "provider": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "indexed_revision": {"type": ["string", "null"]},
+    "trusted": {"type": "boolean"},
+    "relevant_files": {"type": "array", "items": {"type": "string"}},
+    "relevant_symbols": {"type": "array", "items": {"type": "object"}},
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "freshness_evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phase-specification.v1",
+  "title": "Governed GSD Phase Specification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "phase", "intent", "scope", "requirements", "implementation", "verification", "independent_review", "convergence", "remediation", "acceptance"],
+  "properties": {
+    "schema": {"const": "phase-specification.v1"},
+    "phase": {"$ref": "#/$defs/phase"},
+    "intent": {"$ref": "#/$defs/intent"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "requirements": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/requirement"}},
+    "implementation": {"$ref": "#/$defs/implementation"},
+    "verification": {"$ref": "#/$defs/verification"},
+    "independent_review": {"$ref": "#/$defs/independent_review"},
+    "convergence": {"$ref": "#/$defs/convergence"},
+    "remediation": {"$ref": "#/$defs/remediation"},
+    "acceptance": {"$ref": "#/$defs/acceptance"}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "text": {"type": "string", "minLength": 1},
+    "ref_list": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "phase": {
+      "type": "object", "additionalProperties": false,
+      "required": ["specification_id", "phase_id", "title", "version", "specification_hash", "created_at", "updated_at", "created_by", "provenance", "workflow"],
+      "properties": {
+        "specification_id": {"$ref": "#/$defs/id"}, "phase_id": {"$ref": "#/$defs/id"}, "title": {"$ref": "#/$defs/text"}, "version": {"$ref": "#/$defs/version"},
+        "specification_hash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "created_at": {"type": "string", "format": "date-time"}, "updated_at": {"type": "string", "format": "date-time"}, "created_by": {"$ref": "#/$defs/text"},
+        "provenance": {"type": "object", "additionalProperties": false, "required": ["source_refs", "supersedes_ref"], "properties": {"source_refs": {"$ref": "#/$defs/ref_list"}, "supersedes_ref": {"type": ["string", "null"]}}},
+        "workflow": {"type": "object", "additionalProperties": false, "required": ["schema", "workflow_id"], "properties": {"schema": {"const": "development-workflow.v1"}, "workflow_id": {"type": ["string", "null"]}}}
+      }
+    },
+    "intent": {"type": "object", "additionalProperties": false, "required": ["objective", "desired_outcome", "business_context"], "properties": {"objective": {"$ref": "#/$defs/text"}, "desired_outcome": {"$ref": "#/$defs/text"}, "business_context": {"type": ["string", "null"]}}},
+    "scope": {"type": "object", "additionalProperties": false, "required": ["in_scope", "non_goals", "constraints"], "properties": {"in_scope": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}}, "non_goals": {"type": "array", "items": {"$ref": "#/$defs/text"}}, "constraints": {"type": "array", "items": {"$ref": "#/$defs/text"}}}},
+    "requirement": {
+      "type": "object", "additionalProperties": false, "required": ["requirement_id", "statement", "mandatory", "acceptance_criteria", "evidence_contract", "verification_method", "dependencies"],
+      "properties": {
+        "requirement_id": {"$ref": "#/$defs/id"}, "statement": {"$ref": "#/$defs/text"}, "mandatory": {"type": "boolean"}, "verification_method": {"$ref": "#/$defs/text"}, "dependencies": {"$ref": "#/$defs/ref_list"},
+        "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["criterion_id", "statement"], "properties": {"criterion_id": {"$ref": "#/$defs/id"}, "statement": {"$ref": "#/$defs/text"}}}},
+        "evidence_contract": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["evidence_type", "required", "producer", "verification_method"], "properties": {"evidence_type": {"$ref": "#/$defs/id"}, "required": {"type": "boolean"}, "producer": {"$ref": "#/$defs/text"}, "verification_method": {"$ref": "#/$defs/text"}}}}
+      }
+    },
+    "task": {"type": "object", "additionalProperties": false, "required": ["task_id", "statement", "depends_on", "requirement_refs", "expected_artifacts"], "properties": {"task_id": {"$ref": "#/$defs/id"}, "statement": {"$ref": "#/$defs/text"}, "depends_on": {"$ref": "#/$defs/ref_list"}, "requirement_refs": {"$ref": "#/$defs/ref_list"}, "expected_artifacts": {"type": "array", "items": {"$ref": "#/$defs/id"}}}},
+    "implementation": {"type": "object", "additionalProperties": false, "required": ["tasks", "execution_strategy"], "properties": {"tasks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/task"}}, "execution_strategy": {"$ref": "#/$defs/text"}}},
+    "verification": {"type": "object", "additionalProperties": false, "required": ["required_checks", "required_evidence", "forge_required", "live_verification_required"], "properties": {"required_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}}, "required_evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}}, "forge_required": {"type": "boolean"}, "live_verification_required": {"type": "boolean"}}},
+    "independent_review": {"type": "object", "additionalProperties": false, "required": ["required", "authority", "required_context", "required_evidence", "remediation_on_findings"], "properties": {"required": {"type": "boolean"}, "authority": {"const": "development-platform-core.independent-review"}, "required_context": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "required_evidence": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "remediation_on_findings": {"$ref": "#/$defs/text"}}},
+    "convergence": {"type": "object", "additionalProperties": false, "required": ["required", "required_conditions", "failure_states"], "properties": {"required": {"type": "boolean"}, "required_conditions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}}, "failure_states": {"type": "array", "uniqueItems": true, "items": {"enum": ["REMEDIATION_REQUIRED", "BLOCKED"]}}}},
+    "remediation": {"type": "object", "additionalProperties": false, "required": ["retry_policy", "rework_policy", "escalation_policy"], "properties": {"retry_policy": {"$ref": "#/$defs/text"}, "rework_policy": {"$ref": "#/$defs/text"}, "escalation_policy": {"$ref": "#/$defs/text"}}},
+    "acceptance": {"type": "object", "additionalProperties": false, "required": ["authority", "workflow_schema", "required_conditions"], "properties": {"authority": {"const": "development-platform-core.acceptance-authority"}, "workflow_schema": {"const": "development-workflow.v1"}, "required_conditions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}}}}
+  }
+}

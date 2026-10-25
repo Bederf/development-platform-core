@@ -1,0 +1,27 @@
+{
+  "schema": "historical-path-identity-exception.v1",
+  "record_type": "historical_path_identity_exception",
+  "exception_id": "finding-disposition-id-exception",
+  "contract_family": "finding-disposition",
+  "contract_version": "1.0.0",
+  "schema_id": "finding-disposition.v1",
+  "artifact_path": "contracts/finding-disposition.v1.candidate.schema.json",
+  "source_digest": "sha256:af81ed82b3cb4c9fbac7fa34d899f574d9919a07222cdee76af2007be3cbb02b",
+  "source_revision": "git-ref:refs/tags/core-authority/finding-disposition-source-state-v1",
+  "owner_decision_ref": {
+    "semantic_type": "owner_decision",
+    "id": "contract-authority-owner-decision",
+    "version": "1.0.0",
+    "digest": "sha256:a2fb89cc33e74e8e05e49a7a6b14f45285bab582a2aadd5348db7db7339ad128"
+  },
+  "validity_scope": {
+    "scope_type": "historical_compatibility",
+    "scope_id": "core"
+  },
+  "exception_status": "active",
+  "constraints": {
+    "non_authoritative": true,
+    "non_admissibility_granting": true,
+    "non_transferable": true
+  }
+}

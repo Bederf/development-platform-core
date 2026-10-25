@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "acceptance-content.v1",
+  "title": "Acceptance Content v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "acceptance_ref", "artifact_ref", "kind", "stage", "artifact_version", "producer", "supersedes_ref", "created_at", "phase_specification", "authorization_ref", "authorization_digest", "review_request_ref", "implementation_revision_ref", "forge_evidence_ref", "forge_evidence_digest", "convergence_refs", "authority_boundary"],
+  "properties": {
+    "schema": {"const": "acceptance-content.v1"},
+    "acceptance_ref": {"type": "string", "minLength": 1},
+    "artifact_ref": {"type": "string", "minLength": 1},
+    "kind": {"const": "acceptance"},
+    "stage": {"const": "ACCEPTANCE"},
+    "artifact_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "producer": {"type": "string", "minLength": 1},
+    "supersedes_ref": {"type": ["string", "null"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "phase_specification": {"$ref": "#/$defs/phase"},
+    "authorization_ref": {"type": "string", "minLength": 1},
+    "authorization_digest": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+    "review_request_ref": {"type": "string", "minLength": 1},
+    "implementation_revision_ref": {"type": "string", "minLength": 1},
+    "forge_evidence_ref": {"type": "string", "minLength": 1},
+    "forge_evidence_digest": {"type": ["string", "null"], "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+    "convergence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forge_non_authoritative", "production_authority_granted"],
+      "properties": {
+        "forge_non_authoritative": {"const": true},
+        "production_authority_granted": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_id", "specification_ref", "specification_id", "specification_version", "specification_hash", "forge_required", "verification_mode"],
+      "properties": {
+        "phase_id": {"type": "string", "minLength": 1},
+        "specification_ref": {"type": "string", "minLength": 1},
+        "specification_id": {"type": "string", "minLength": 1},
+        "specification_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "specification_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+        "forge_required": {"type": "boolean"},
+        "verification_mode": {"enum": ["live", "qualification"]}
+      }
+    }
+  }
+}
